@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine3.21 AS build
+FROM golang:1.26-alpine3.22 AS build
 
 RUN apk --update add \
     gcc \
@@ -13,7 +13,7 @@ WORKDIR /build
 
 RUN go build -ldflags "-s -w -X github.com/bitmagnet-io/bitmagnet/internal/version.GitTag=$(git describe --tags --always --dirty)"
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk --update add \
     curl \
