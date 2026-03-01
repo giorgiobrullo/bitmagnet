@@ -14,8 +14,8 @@ type Profile struct {
 var ProfileDefault = Profile{
 	ID:           "default",
 	Title:        "bitmagnet",
-	DefaultLimit: 100,
-	MaxLimit:     100,
+	DefaultLimit: 200,
+	MaxLimit:     500,
 }
 
 func (p Profile) MergeDefaults() Profile {
