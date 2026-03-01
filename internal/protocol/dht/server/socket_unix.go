@@ -27,6 +27,12 @@ func (s *socket) Open(localAddr netip.AddrPort) error {
 	if err != nil {
 		return fmt.Errorf("error creating socket: %w", err)
 	}
+	if family == unix.AF_INET6 {
+		if err := unix.SetsockoptInt(fd, unix.IPPROTO_IPV6, unix.IPV6_V6ONLY, 1); err != nil {
+			_ = unix.Close(fd)
+			return fmt.Errorf("error setting IPV6_V6ONLY: %w", err)
+		}
+	}
 	sAddr, addrErr := addrPortToSockaddr(localAddr)
 	if addrErr != nil {
 		_ = unix.Close(fd)
