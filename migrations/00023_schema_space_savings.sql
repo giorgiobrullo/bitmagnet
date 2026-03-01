@@ -11,11 +11,26 @@
 -- Promoting it to PK and dropping the old one saves ~30GB at scale.
 -- See: https://github.com/bitmagnet-io/bitmagnet/issues/191
 
--- Drop the old composite PK (drops its B-tree index, freeing the most space).
-ALTER TABLE torrent_files DROP CONSTRAINT torrent_files_pkey;
--- Promote the existing unique index to PK (near-instant, no index rebuild needed).
-ALTER TABLE torrent_files ADD CONSTRAINT torrent_files_pkey
-    PRIMARY KEY USING INDEX torrent_files_info_hash_index_key;
+-- Idempotent: only swap if PK still includes the 'path' column.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_attribute a
+        JOIN pg_constraint c ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+        WHERE c.conrelid = 'torrent_files'::regclass
+        AND c.contype = 'p'
+        AND a.attname = 'path'
+    ) THEN
+        -- Drop the UNIQUE constraint on (info_hash, index) first; its underlying
+        -- index is owned by the constraint and cannot be reused via USING INDEX.
+        ALTER TABLE torrent_files DROP CONSTRAINT IF EXISTS torrent_files_info_hash_index_key;
+        -- Drop the old composite PK (drops its B-tree index, freeing the most space).
+        ALTER TABLE torrent_files DROP CONSTRAINT torrent_files_pkey;
+        -- Create new PK on (info_hash, index) directly.
+        ALTER TABLE torrent_files ADD CONSTRAINT torrent_files_pkey
+            PRIMARY KEY (info_hash, "index");
+    END IF;
+END $$;
 
 -- =============================================================================
 -- 2. CONTENT_ATTRIBUTES: Drop redundant unique constraint identical to PK
@@ -60,7 +75,7 @@ DROP INDEX IF EXISTS content_collections_content_content_collection_type_idx;
 DROP INDEX IF EXISTS content_collections_content_content_collection_source_idx;
 DROP INDEX IF EXISTS content_collections_content_content_collection_id_idx;
 
-CREATE INDEX content_collections_content_collection_lookup_idx
+CREATE INDEX IF NOT EXISTS content_collections_content_collection_lookup_idx
     ON content_collections_content (
         content_collection_type, content_collection_source, content_collection_id
     );
@@ -70,10 +85,21 @@ CREATE INDEX content_collections_content_collection_lookup_idx
 -- +goose Down
 -- +goose StatementBegin
 
--- Revert torrent_files PK
-ALTER TABLE torrent_files DROP CONSTRAINT torrent_files_pkey;
-ALTER TABLE torrent_files ADD PRIMARY KEY (info_hash, path);
-ALTER TABLE torrent_files ADD UNIQUE (info_hash, index);
+-- Revert torrent_files PK (only if PK is currently on (info_hash, index))
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_attribute a
+        JOIN pg_constraint c ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
+        WHERE c.conrelid = 'torrent_files'::regclass
+        AND c.contype = 'p'
+        AND a.attname = 'path'
+    ) THEN
+        ALTER TABLE torrent_files DROP CONSTRAINT torrent_files_pkey;
+        ALTER TABLE torrent_files ADD PRIMARY KEY (info_hash, path);
+        ALTER TABLE torrent_files ADD UNIQUE (info_hash, "index");
+    END IF;
+END $$;
 
 -- Revert content_attributes unique constraint
 ALTER TABLE content_attributes
