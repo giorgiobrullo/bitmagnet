@@ -80,13 +80,51 @@ func LanguageValueStrings() []string {
 	return values
 }
 
+// ambiguousAlpha3 is a set of ISO 639-2 alpha3 language codes that are also common
+// English words, name fragments, or abbreviations. Including these in the language
+// detection regex causes false positives (e.g., "San Francisco" → Sanskrit, "Mac" → Macedonian).
+// These languages remain detectable by their full name, alpha2+dub suffix, and aliases.
+// See: https://github.com/bitmagnet-io/bitmagnet/issues/58
+var ambiguousAlpha3 = map[string]struct{}{
+	"san": {}, // Sanskrit — "San" (Spanish prefix, Japanese honorific)
+	"mac": {}, // Macedonian — "Mac" (computers, names)
+	"arm": {}, // Armenian — "arm" (body part)
+	"dan": {}, // Danish — "Dan" (common name)
+	"nor": {}, // Norwegian — "nor" (conjunction)
+	"mon": {}, // Mongolian — "Mon" (Monday)
+	"fin": {}, // Finnish — "fin" (ending, fin)
+	"ice": {}, // Icelandic — "ice"
+	"may": {}, // Malay — "May" (month, name)
+	"per": {}, // Persian — "per" (preposition)
+	"geo": {}, // Georgian — "Geo" (prefix)
+	"ind": {}, // Indonesian — "ind" (Indiana, industry)
+	"cat": {}, // Catalan — "cat"
+	"cos": {}, // Corsican — "cos" (because, cosplay)
+	"est": {}, // Estonian — "est" (superlative suffix)
+	"mal": {}, // Malayalam — "mal" (prefix)
+	"som": {}, // Somali — "som" (some)
+	"wel": {}, // Welsh — "wel" (well)
+	"rum": {}, // Romanian — "rum" (drink)
+	"hun": {}, // Hungarian — "hun" (honey)
+	"lit": {}, // Lithuanian — "lit" (literature, slang)
+	"pol": {}, // Polish — "pol" (politics)
+	"bos": {}, // Bosnian — "bos" (boss)
+	"che": {}, // Chechen — "che" (Che Guevara)
+	"vie": {}, // Vietnamese — "vie" (to vie)
+	"tam": {}, // Tamil — "tam" (tame)
+	"smo": {}, // Samoan — "smo" (smoke)
+}
+
 func newLanguagesRegex() *regexp.Regexp {
 	languages := LanguageValues()
 	tokens := make([]string, 0, len(languages)*4)
 
 	for _, lang := range languages {
 		tokens = append(tokens, lang.Alpha2()+"dub")
-		tokens = append(tokens, lang.Alpha3())
+		alpha3 := lang.Alpha3()
+		if _, ambiguous := ambiguousAlpha3[alpha3]; !ambiguous {
+			tokens = append(tokens, alpha3)
+		}
 		tokens = append(tokens, strings.ToLower(lang.Name()))
 		tokens = append(tokens, namesToLower(lang.Aliases()...)...)
 	}
