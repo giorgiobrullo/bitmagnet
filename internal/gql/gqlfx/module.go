@@ -63,10 +63,6 @@ func New() fx.Option {
 						if err != nil {
 							return nil, err
 						}
-						tm, err := p.TorrentMetricsClient.Get()
-						if err != nil {
-							return nil, err
-						}
 						pr, err := p.Processor.Get()
 						if err != nil {
 							return nil, err
@@ -82,7 +78,7 @@ func New() fx.Option {
 							DhtMetricsClient:     p.DhtMetricsClient,
 							QueueMetricsClient:   qmc,
 							QueueManager:         qm,
-							TorrentMetricsClient: tm,
+							TorrentMetricsClient: p.TorrentMetricsClient,
 							Processor:            pr,
 							BlockingManager:      bm,
 						}, nil
@@ -111,7 +107,7 @@ type Params struct {
 	DhtMetricsClient     dhtmetrics.Client
 	QueueMetricsClient   lazy.Lazy[queuemetrics.Client]
 	QueueManager         lazy.Lazy[manager.Manager]
-	TorrentMetricsClient lazy.Lazy[torrentmetrics.Client]
+	TorrentMetricsClient torrentmetrics.Client
 	Processor            lazy.Lazy[processor.Processor]
 	BlockingManager      lazy.Lazy[blocking.Manager]
 }

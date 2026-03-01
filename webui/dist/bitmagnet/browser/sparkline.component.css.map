@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/dashboard/dht/sparkline.component.ts"],
-  "sourcesContent": ["\n      :host {\n        display: block;\n        line-height: 0;\n      }\n      svg {\n        width: 100%;\n        height: auto;\n      }\n    "],
-  "mappings": ";AACM;AACE,WAAA;AACA,eAAA;;AAEF;AACE,SAAA;AACA,UAAA;;",
-  "names": []
-}

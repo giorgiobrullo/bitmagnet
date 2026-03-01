@@ -337,6 +337,11 @@ type ComplexityRoot struct {
 		VideoSource     func(childComplexity int) int
 	}
 
+	TorrentContentBreakdown struct {
+		ContentType func(childComplexity int) int
+		Count       func(childComplexity int) int
+	}
+
 	TorrentContentQuery struct {
 		Search func(childComplexity int, input gqlmodel.TorrentContentSearchQueryInput) int
 	}
@@ -373,6 +378,16 @@ type ComplexityRoot struct {
 		TotalCount  func(childComplexity int) int
 	}
 
+	TorrentLibraryMetricsResult struct {
+		Snapshots func(childComplexity int) int
+	}
+
+	TorrentLibrarySnapshot struct {
+		Bucket     func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+		TotalSize  func(childComplexity int) int
+	}
+
 	TorrentListSourcesResult struct {
 		Sources func(childComplexity int) int
 	}
@@ -397,10 +412,12 @@ type ComplexityRoot struct {
 	}
 
 	TorrentQuery struct {
-		Files       func(childComplexity int, input gqlmodel.TorrentFilesQueryInput) int
-		ListSources func(childComplexity int) int
-		Metrics     func(childComplexity int, input gen.TorrentMetricsQueryInput) int
-		SuggestTags func(childComplexity int, input *gen.SuggestTagsQueryInput) int
+		ContentBreakdown func(childComplexity int) int
+		Files            func(childComplexity int, input gqlmodel.TorrentFilesQueryInput) int
+		LibraryMetrics   func(childComplexity int, input gen.TorrentLibraryMetricsInput) int
+		ListSources      func(childComplexity int) int
+		Metrics          func(childComplexity int, input gen.TorrentMetricsQueryInput) int
+		SuggestTags      func(childComplexity int, input *gen.SuggestTagsQueryInput) int
 	}
 
 	TorrentSource struct {
@@ -1780,6 +1797,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TorrentContentAggregations.VideoSource(childComplexity), true
 
+	case "TorrentContentBreakdown.contentType":
+		if e.complexity.TorrentContentBreakdown.ContentType == nil {
+			break
+		}
+
+		return e.complexity.TorrentContentBreakdown.ContentType(childComplexity), true
+
+	case "TorrentContentBreakdown.count":
+		if e.complexity.TorrentContentBreakdown.Count == nil {
+			break
+		}
+
+		return e.complexity.TorrentContentBreakdown.Count(childComplexity), true
+
 	case "TorrentContentQuery.search":
 		if e.complexity.TorrentContentQuery.Search == nil {
 			break
@@ -1932,6 +1963,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TorrentFilesQueryResult.TotalCount(childComplexity), true
 
+	case "TorrentLibraryMetricsResult.snapshots":
+		if e.complexity.TorrentLibraryMetricsResult.Snapshots == nil {
+			break
+		}
+
+		return e.complexity.TorrentLibraryMetricsResult.Snapshots(childComplexity), true
+
+	case "TorrentLibrarySnapshot.bucket":
+		if e.complexity.TorrentLibrarySnapshot.Bucket == nil {
+			break
+		}
+
+		return e.complexity.TorrentLibrarySnapshot.Bucket(childComplexity), true
+
+	case "TorrentLibrarySnapshot.totalCount":
+		if e.complexity.TorrentLibrarySnapshot.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.TorrentLibrarySnapshot.TotalCount(childComplexity), true
+
+	case "TorrentLibrarySnapshot.totalSize":
+		if e.complexity.TorrentLibrarySnapshot.TotalSize == nil {
+			break
+		}
+
+		return e.complexity.TorrentLibrarySnapshot.TotalSize(childComplexity), true
+
 	case "TorrentListSourcesResult.sources":
 		if e.complexity.TorrentListSourcesResult.Sources == nil {
 			break
@@ -2034,6 +2093,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TorrentMutation.SetTags(childComplexity, args["infoHashes"].([]protocol.ID), args["tagNames"].([]string)), true
 
+	case "TorrentQuery.contentBreakdown":
+		if e.complexity.TorrentQuery.ContentBreakdown == nil {
+			break
+		}
+
+		return e.complexity.TorrentQuery.ContentBreakdown(childComplexity), true
+
 	case "TorrentQuery.files":
 		if e.complexity.TorrentQuery.Files == nil {
 			break
@@ -2045,6 +2111,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TorrentQuery.Files(childComplexity, args["input"].(gqlmodel.TorrentFilesQueryInput)), true
+
+	case "TorrentQuery.libraryMetrics":
+		if e.complexity.TorrentQuery.LibraryMetrics == nil {
+			break
+		}
+
+		args, err := ec.field_TorrentQuery_libraryMetrics_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TorrentQuery.LibraryMetrics(childComplexity, args["input"].(gen.TorrentLibraryMetricsInput)), true
 
 	case "TorrentQuery.listSources":
 		if e.complexity.TorrentQuery.ListSources == nil {
@@ -2302,6 +2380,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputTorrentFileTypeFacetInput,
 		ec.unmarshalInputTorrentFilesOrderByInput,
 		ec.unmarshalInputTorrentFilesQueryInput,
+		ec.unmarshalInputTorrentLibraryMetricsInput,
 		ec.unmarshalInputTorrentMetricsQueryInput,
 		ec.unmarshalInputTorrentReprocessInput,
 		ec.unmarshalInputTorrentSourceFacetInput,
@@ -2656,6 +2735,27 @@ input TorrentMetricsQueryInput {
   startTime: DateTime
   endTime: DateTime
 }
+
+type TorrentLibrarySnapshot {
+  bucket: DateTime!
+  totalCount: Int!
+  totalSize: Float!
+}
+
+type TorrentLibraryMetricsResult {
+  snapshots: [TorrentLibrarySnapshot!]!
+}
+
+input TorrentLibraryMetricsInput {
+  bucketDuration: MetricsBucketDuration!
+  startTime: DateTime
+  endTime: DateTime
+}
+
+type TorrentContentBreakdown {
+  contentType: String!
+  count: Int!
+}
 `, BuiltIn: false},
 	{Name: "../../graphql/schema/models.graphqls", Input: `type Torrent {
   infoHash: Hash20!
@@ -2831,6 +2931,8 @@ type TorrentQuery {
   listSources: TorrentListSourcesResult!
   suggestTags(input: SuggestTagsQueryInput): TorrentSuggestTagsResult!
   metrics(input: TorrentMetricsQueryInput!): TorrentMetricsQueryResult!
+  libraryMetrics(input: TorrentLibraryMetricsInput!): TorrentLibraryMetricsResult!
+  contentBreakdown: [TorrentContentBreakdown!]!
 }
 
 input SuggestTagsQueryInput {
@@ -3636,6 +3738,34 @@ func (ec *executionContext) field_TorrentQuery_files_argsInput(
 	}
 
 	var zeroVal gqlmodel.TorrentFilesQueryInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_TorrentQuery_libraryMetrics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_TorrentQuery_libraryMetrics_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_TorrentQuery_libraryMetrics_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (gen.TorrentLibraryMetricsInput, error) {
+	if _, ok := rawArgs["input"]; !ok {
+		var zeroVal gen.TorrentLibraryMetricsInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNTorrentLibraryMetricsInput2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibraryMetricsInput(ctx, tmp)
+	}
+
+	var zeroVal gen.TorrentLibraryMetricsInput
 	return zeroVal, nil
 }
 
@@ -7592,6 +7722,10 @@ func (ec *executionContext) fieldContext_Query_torrent(_ context.Context, field 
 				return ec.fieldContext_TorrentQuery_suggestTags(ctx, field)
 			case "metrics":
 				return ec.fieldContext_TorrentQuery_metrics(ctx, field)
+			case "libraryMetrics":
+				return ec.fieldContext_TorrentQuery_libraryMetrics(ctx, field)
+			case "contentBreakdown":
+				return ec.fieldContext_TorrentQuery_contentBreakdown(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TorrentQuery", field.Name)
 		},
@@ -12031,6 +12165,94 @@ func (ec *executionContext) fieldContext_TorrentContentAggregations_videoSource(
 	return fc, nil
 }
 
+func (ec *executionContext) _TorrentContentBreakdown_contentType(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentContentBreakdown) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentContentBreakdown_contentType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContentType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentContentBreakdown_contentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentContentBreakdown",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentContentBreakdown_count(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentContentBreakdown) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentContentBreakdown_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentContentBreakdown_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentContentBreakdown",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TorrentContentQuery_search(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentContentQuery) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TorrentContentQuery_search(ctx, field)
 	if err != nil {
@@ -13048,6 +13270,190 @@ func (ec *executionContext) fieldContext_TorrentFilesQueryResult_items(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _TorrentLibraryMetricsResult_snapshots(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentLibraryMetricsResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentLibraryMetricsResult_snapshots(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Snapshots, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]gen.TorrentLibrarySnapshot)
+	fc.Result = res
+	return ec.marshalNTorrentLibrarySnapshot2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibrarySnapshotᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentLibraryMetricsResult_snapshots(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentLibraryMetricsResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "bucket":
+				return ec.fieldContext_TorrentLibrarySnapshot_bucket(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_TorrentLibrarySnapshot_totalCount(ctx, field)
+			case "totalSize":
+				return ec.fieldContext_TorrentLibrarySnapshot_totalSize(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TorrentLibrarySnapshot", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentLibrarySnapshot_bucket(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentLibrarySnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentLibrarySnapshot_bucket(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bucket, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentLibrarySnapshot_bucket(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentLibrarySnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentLibrarySnapshot_totalCount(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentLibrarySnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentLibrarySnapshot_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentLibrarySnapshot_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentLibrarySnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentLibrarySnapshot_totalSize(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentLibrarySnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentLibrarySnapshot_totalSize(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalSize, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentLibrarySnapshot_totalSize(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentLibrarySnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TorrentListSourcesResult_sources(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentListSourcesResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TorrentListSourcesResult_sources(ctx, field)
 	if err != nil {
@@ -13813,6 +14219,115 @@ func (ec *executionContext) fieldContext_TorrentQuery_metrics(ctx context.Contex
 	if fc.Args, err = ec.field_TorrentQuery_metrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentQuery_libraryMetrics(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentQuery_libraryMetrics(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LibraryMetrics(ctx, fc.Args["input"].(gen.TorrentLibraryMetricsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(gen.TorrentLibraryMetricsResult)
+	fc.Result = res
+	return ec.marshalNTorrentLibraryMetricsResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibraryMetricsResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentQuery_libraryMetrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "snapshots":
+				return ec.fieldContext_TorrentLibraryMetricsResult_snapshots(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TorrentLibraryMetricsResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_TorrentQuery_libraryMetrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentQuery_contentBreakdown(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentQuery_contentBreakdown(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContentBreakdown(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]gen.TorrentContentBreakdown)
+	fc.Result = res
+	return ec.marshalNTorrentContentBreakdown2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentContentBreakdownᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentQuery_contentBreakdown(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "contentType":
+				return ec.fieldContext_TorrentContentBreakdown_contentType(ctx, field)
+			case "count":
+				return ec.fieldContext_TorrentContentBreakdown_count(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TorrentContentBreakdown", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -18025,6 +18540,47 @@ func (ec *executionContext) unmarshalInputTorrentFilesQueryInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTorrentLibraryMetricsInput(ctx context.Context, obj any) (gen.TorrentLibraryMetricsInput, error) {
+	var it gen.TorrentLibraryMetricsInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"bucketDuration", "startTime", "endTime"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "bucketDuration":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketDuration"))
+			data, err := ec.unmarshalNMetricsBucketDuration2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐMetricsBucketDuration(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BucketDuration = data
+		case "startTime":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startTime"))
+			data, err := ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.StartTime = graphql.OmittableOf(data)
+		case "endTime":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endTime"))
+			data, err := ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EndTime = graphql.OmittableOf(data)
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTorrentMetricsQueryInput(ctx context.Context, obj any) (gen.TorrentMetricsQueryInput, error) {
 	var it gen.TorrentMetricsQueryInput
 	asMap := map[string]any{}
@@ -20540,6 +21096,50 @@ func (ec *executionContext) _TorrentContentAggregations(ctx context.Context, sel
 	return out
 }
 
+var torrentContentBreakdownImplementors = []string{"TorrentContentBreakdown"}
+
+func (ec *executionContext) _TorrentContentBreakdown(ctx context.Context, sel ast.SelectionSet, obj *gen.TorrentContentBreakdown) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, torrentContentBreakdownImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TorrentContentBreakdown")
+		case "contentType":
+			out.Values[i] = ec._TorrentContentBreakdown_contentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._TorrentContentBreakdown_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var torrentContentQueryImplementors = []string{"TorrentContentQuery"}
 
 func (ec *executionContext) _TorrentContentQuery(ctx context.Context, sel ast.SelectionSet, obj *gqlmodel.TorrentContentQuery) graphql.Marshaler {
@@ -20808,6 +21408,94 @@ func (ec *executionContext) _TorrentFilesQueryResult(ctx context.Context, sel as
 			out.Values[i] = ec._TorrentFilesQueryResult_hasNextPage(ctx, field, obj)
 		case "items":
 			out.Values[i] = ec._TorrentFilesQueryResult_items(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var torrentLibraryMetricsResultImplementors = []string{"TorrentLibraryMetricsResult"}
+
+func (ec *executionContext) _TorrentLibraryMetricsResult(ctx context.Context, sel ast.SelectionSet, obj *gen.TorrentLibraryMetricsResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, torrentLibraryMetricsResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TorrentLibraryMetricsResult")
+		case "snapshots":
+			out.Values[i] = ec._TorrentLibraryMetricsResult_snapshots(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var torrentLibrarySnapshotImplementors = []string{"TorrentLibrarySnapshot"}
+
+func (ec *executionContext) _TorrentLibrarySnapshot(ctx context.Context, sel ast.SelectionSet, obj *gen.TorrentLibrarySnapshot) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, torrentLibrarySnapshotImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TorrentLibrarySnapshot")
+		case "bucket":
+			out.Values[i] = ec._TorrentLibrarySnapshot_bucket(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._TorrentLibrarySnapshot_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalSize":
+			out.Values[i] = ec._TorrentLibrarySnapshot_totalSize(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21294,6 +21982,78 @@ func (ec *executionContext) _TorrentQuery(ctx context.Context, sel ast.Selection
 					}
 				}()
 				res = ec._TorrentQuery_metrics(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "libraryMetrics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TorrentQuery_libraryMetrics(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "contentBreakdown":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TorrentQuery_contentBreakdown(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -22434,6 +23194,21 @@ func (ec *executionContext) marshalNFilesStatus2githubᚗcomᚋbitmagnetᚑioᚋ
 	return res
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNGenreAgg2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐGenreAgg(ctx context.Context, sel ast.SelectionSet, v gen.GenreAgg) graphql.Marshaler {
 	return ec._GenreAgg(ctx, sel, &v)
 }
@@ -23004,6 +23779,54 @@ func (ec *executionContext) marshalNTorrentContentAggregations2githubᚗcomᚋbi
 	return ec._TorrentContentAggregations(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNTorrentContentBreakdown2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentContentBreakdown(ctx context.Context, sel ast.SelectionSet, v gen.TorrentContentBreakdown) graphql.Marshaler {
+	return ec._TorrentContentBreakdown(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTorrentContentBreakdown2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentContentBreakdownᚄ(ctx context.Context, sel ast.SelectionSet, v []gen.TorrentContentBreakdown) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTorrentContentBreakdown2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentContentBreakdown(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNTorrentContentOrderByField2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentContentOrderByField(ctx context.Context, v any) (gen.TorrentContentOrderByField, error) {
 	var res gen.TorrentContentOrderByField
 	err := res.UnmarshalGQL(v)
@@ -23106,6 +23929,63 @@ func (ec *executionContext) unmarshalNTorrentFilesQueryInput2githubᚗcomᚋbitm
 
 func (ec *executionContext) marshalNTorrentFilesQueryResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋdatabaseᚋqueryᚐGenericResult(ctx context.Context, sel ast.SelectionSet, v query.GenericResult[model.TorrentFile]) graphql.Marshaler {
 	return ec._TorrentFilesQueryResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNTorrentLibraryMetricsInput2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibraryMetricsInput(ctx context.Context, v any) (gen.TorrentLibraryMetricsInput, error) {
+	res, err := ec.unmarshalInputTorrentLibraryMetricsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTorrentLibraryMetricsResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibraryMetricsResult(ctx context.Context, sel ast.SelectionSet, v gen.TorrentLibraryMetricsResult) graphql.Marshaler {
+	return ec._TorrentLibraryMetricsResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTorrentLibrarySnapshot2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibrarySnapshot(ctx context.Context, sel ast.SelectionSet, v gen.TorrentLibrarySnapshot) graphql.Marshaler {
+	return ec._TorrentLibrarySnapshot(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTorrentLibrarySnapshot2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibrarySnapshotᚄ(ctx context.Context, sel ast.SelectionSet, v []gen.TorrentLibrarySnapshot) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTorrentLibrarySnapshot2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentLibrarySnapshot(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNTorrentListSourcesResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐTorrentListSourcesResult(ctx context.Context, sel ast.SelectionSet, v gen.TorrentListSourcesResult) graphql.Marshaler {

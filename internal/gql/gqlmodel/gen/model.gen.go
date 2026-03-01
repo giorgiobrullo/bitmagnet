@@ -182,6 +182,11 @@ type TorrentContentAggregations struct {
 	VideoSource     []VideoSourceAgg     `json:"videoSource,omitempty"`
 }
 
+type TorrentContentBreakdown struct {
+	ContentType string `json:"contentType"`
+	Count       int    `json:"count"`
+}
+
 type TorrentContentFacetsInput struct {
 	ContentType     graphql.Omittable[*ContentTypeFacetInput]     `json:"contentType,omitempty"`
 	TorrentSource   graphql.Omittable[*TorrentSourceFacetInput]   `json:"torrentSource,omitempty"`
@@ -217,6 +222,22 @@ type TorrentFileTypeFacetInput struct {
 type TorrentFilesOrderByInput struct {
 	Field      TorrentFilesOrderByField `json:"field"`
 	Descending graphql.Omittable[*bool] `json:"descending,omitempty"`
+}
+
+type TorrentLibraryMetricsInput struct {
+	BucketDuration MetricsBucketDuration         `json:"bucketDuration"`
+	StartTime      graphql.Omittable[*time.Time] `json:"startTime,omitempty"`
+	EndTime        graphql.Omittable[*time.Time] `json:"endTime,omitempty"`
+}
+
+type TorrentLibraryMetricsResult struct {
+	Snapshots []TorrentLibrarySnapshot `json:"snapshots"`
+}
+
+type TorrentLibrarySnapshot struct {
+	Bucket     time.Time `json:"bucket"`
+	TotalCount int       `json:"totalCount"`
+	TotalSize  float64   `json:"totalSize"`
 }
 
 type TorrentListSourcesResult struct {

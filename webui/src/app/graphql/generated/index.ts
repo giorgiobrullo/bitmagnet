@@ -570,6 +570,12 @@ export type TorrentContentAggregations = {
   videoSource?: Maybe<Array<VideoSourceAgg>>;
 };
 
+export type TorrentContentBreakdown = {
+  __typename?: 'TorrentContentBreakdown';
+  contentType: Scalars['String']['output'];
+  count: Scalars['Int']['output'];
+};
+
 export type TorrentContentFacetsInput = {
   contentType?: InputMaybe<ContentTypeFacetInput>;
   genre?: InputMaybe<GenreFacetInput>;
@@ -690,6 +696,24 @@ export type TorrentFilesQueryResult = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type TorrentLibraryMetricsInput = {
+  bucketDuration: MetricsBucketDuration;
+  endTime?: InputMaybe<Scalars['DateTime']['input']>;
+  startTime?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type TorrentLibraryMetricsResult = {
+  __typename?: 'TorrentLibraryMetricsResult';
+  snapshots: Array<TorrentLibrarySnapshot>;
+};
+
+export type TorrentLibrarySnapshot = {
+  __typename?: 'TorrentLibrarySnapshot';
+  bucket: Scalars['DateTime']['output'];
+  totalCount: Scalars['Int']['output'];
+  totalSize: Scalars['Float']['output'];
+};
+
 export type TorrentListSourcesResult = {
   __typename?: 'TorrentListSourcesResult';
   sources: Array<TorrentSource>;
@@ -754,7 +778,9 @@ export type TorrentMutationSetTagsArgs = {
 
 export type TorrentQuery = {
   __typename?: 'TorrentQuery';
+  contentBreakdown: Array<TorrentContentBreakdown>;
   files: TorrentFilesQueryResult;
+  libraryMetrics: TorrentLibraryMetricsResult;
   listSources: TorrentListSourcesResult;
   metrics: TorrentMetricsQueryResult;
   suggestTags: TorrentSuggestTagsResult;
@@ -763,6 +789,11 @@ export type TorrentQuery = {
 
 export type TorrentQueryFilesArgs = {
   input: TorrentFilesQueryInput;
+};
+
+
+export type TorrentQueryLibraryMetricsArgs = {
+  input: TorrentLibraryMetricsInput;
 };
 
 
@@ -1028,6 +1059,13 @@ export type TorrentFilesQueryVariables = Exact<{
 
 
 export type TorrentFilesQuery = { __typename?: 'Query', torrent: { __typename?: 'TorrentQuery', files: { __typename?: 'TorrentFilesQueryResult', totalCount: number, hasNextPage?: boolean | null, items: Array<{ __typename?: 'TorrentFile', infoHash: string, index: number, path: string, size: number, fileType?: FileType | null, createdAt: string, updatedAt: string }> } } };
+
+export type TorrentLibraryMetricsQueryVariables = Exact<{
+  input: TorrentLibraryMetricsInput;
+}>;
+
+
+export type TorrentLibraryMetricsQuery = { __typename?: 'Query', torrent: { __typename?: 'TorrentQuery', libraryMetrics: { __typename?: 'TorrentLibraryMetricsResult', snapshots: Array<{ __typename?: 'TorrentLibrarySnapshot', bucket: string, totalCount: number, totalSize: number }> }, contentBreakdown: Array<{ __typename?: 'TorrentContentBreakdown', contentType: string, count: number }> } };
 
 export type TorrentMetricsQueryVariables = Exact<{
   input: TorrentMetricsQueryInput;
@@ -1577,6 +1615,34 @@ export const TorrentFilesDocument = gql`
   })
   export class TorrentFilesGQL extends Apollo.Query<TorrentFilesQuery, TorrentFilesQueryVariables> {
     override document = TorrentFilesDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const TorrentLibraryMetricsDocument = gql`
+    query TorrentLibraryMetrics($input: TorrentLibraryMetricsInput!) {
+  torrent {
+    libraryMetrics(input: $input) {
+      snapshots {
+        bucket
+        totalCount
+        totalSize
+      }
+    }
+    contentBreakdown {
+      contentType
+      count
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class TorrentLibraryMetricsGQL extends Apollo.Query<TorrentLibraryMetricsQuery, TorrentLibraryMetricsQueryVariables> {
+    override document = TorrentLibraryMetricsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

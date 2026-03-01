@@ -1,0 +1,15 @@
+query TorrentLibraryMetrics($input: TorrentLibraryMetricsInput!) {
+  torrent {
+    libraryMetrics(input: $input) {
+      snapshots {
+        bucket
+        totalCount
+        totalSize
+      }
+    }
+    contentBreakdown {
+      contentType
+      count
+    }
+  }
+}

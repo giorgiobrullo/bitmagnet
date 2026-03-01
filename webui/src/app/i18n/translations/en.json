@@ -106,6 +106,14 @@
       "timeframe": "Timeframe",
       "toggle_legend": "Toggle legend"
     },
+    "torrents": {
+      "total_torrents": "Total Torrents",
+      "total_size": "Total Size",
+      "library_growth": "Library Growth",
+      "storage_growth": "Storage Growth",
+      "content_breakdown": "Content Breakdown",
+      "throughput": "Throughput"
+    },
     "queues": {
       "created": "Created",
       "created_at": "Created at",

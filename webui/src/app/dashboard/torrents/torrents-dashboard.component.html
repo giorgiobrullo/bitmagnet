@@ -1,13 +1,86 @@
 <ng-container *transloco="let t">
   <app-document-title [parts]="[t('routes.torrents'), t('routes.dashboard')]" />
-  <mat-card class="dashboard-card">
-    <mat-card-header>
-      <mat-toolbar>
-        <h2><mat-icon svgIcon="magnet" />{{ t("routes.torrents") }}</h2>
-      </mat-toolbar>
-    </mat-card-header>
-    <mat-card-content>
-      <app-torrent-metrics />
-    </mat-card-content>
-  </mat-card>
+  <div class="torrent-dashboard">
+    <!-- Stat Cards -->
+    <div class="torrent-stats-grid">
+      <mat-card class="torrent-stat-card">
+        <mat-card-content>
+          <div class="torrent-stat-number">{{ totalTorrents | number }}</div>
+          <div class="torrent-stat-label">{{ t("dashboard.torrents.total_torrents") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="torrent-stat-card">
+        <mat-card-content>
+          <div class="torrent-stat-number torrent-stat-number-sm">{{ totalSize || "—" }}</div>
+          <div class="torrent-stat-label">{{ t("dashboard.torrents.total_size") }}</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Content Breakdown -->
+    <div class="torrent-composition">
+      <app-chart
+        [title]="''"
+        [$data]="contentBreakdown$"
+        [adapter]="contentAdapter"
+        [height]="80"
+      />
+    </div>
+
+    <!-- Controls -->
+    <div class="torrent-controls">
+      <mat-button-toggle-group
+        [value]="metricsController.params.timeframe"
+        (change)="metricsController.setTimeframe($event.value)"
+      >
+        @for (name of timeframeNames; track name) {
+          <mat-button-toggle [value]="name">
+            {{ t("dashboard.interval." + name) }}
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+
+      <div class="torrent-controls-right">
+        <mat-icon class="torrent-refresh-icon">autorenew</mat-icon>
+        <mat-form-field subscriptSizing="dynamic" class="torrent-refresh-select">
+          <mat-select
+            [value]="metricsController.params.autoRefresh"
+            (valueChange)="metricsController.setAutoRefreshInterval($event)"
+          >
+            @for (name of autoRefreshIntervalNames; track name) {
+              <mat-option [value]="name">
+                {{ t("dashboard.interval." + name) }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-icon-button
+          (click)="metricsController.refresh()"
+          matTooltip="Refresh"
+        >
+          <mat-icon>sync</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="torrent-charts">
+      <app-chart
+        [title]="t('dashboard.torrents.library_growth')"
+        [$data]="snapshots$"
+        [adapter]="libraryGrowthAdapter"
+      />
+      <app-chart
+        [title]="t('dashboard.torrents.storage_growth')"
+        [$data]="snapshots$"
+        [adapter]="storageGrowthAdapter"
+      />
+      <app-chart
+        [title]="t('dashboard.torrents.throughput')"
+        [$data]="throughputController.result$"
+        [adapter]="throughputAdapter"
+      />
+    </div>
+  </div>
 </ng-container>

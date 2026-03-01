@@ -6,15 +6,8 @@ import { ChartAdapter, FactoryParams } from "../../charting/types";
 import { createThemeColor } from "../../themes/theme-utils";
 import { ThemeInfoService } from "../../themes/theme-info.service";
 import { resolveDateLocale } from "../../dates/dates.locales";
+import { withAlpha } from "../../charting/color-utils";
 import { DhtMetricsSnapshot } from "./dht-metrics.controller";
-
-/** Convert an rgb(...) string to rgba(..., alpha). */
-function withAlpha(rgb: string | undefined, alpha: number): string {
-  if (!rgb) return `rgba(128,128,128,${alpha})`;
-  const match = rgb.match(/\d+/g);
-  if (!match || match.length < 3) return `rgba(128,128,128,${alpha})`;
-  return `rgba(${match[0]},${match[1]},${match[2]},${alpha})`;
-}
 
 @Injectable({ providedIn: "root" })
 export class DhtChartAdapterNodes

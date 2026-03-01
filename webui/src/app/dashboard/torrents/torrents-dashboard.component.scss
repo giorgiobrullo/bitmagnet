@@ -1,24 +1,77 @@
-mat-card-header {
+.torrent-dashboard {
+  padding: 16px;
+}
+
+.torrent-stats-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 20px;
+}
+
+.torrent-stat-card {
+  text-align: center;
+
+  mat-card-content {
+    padding: 14px 12px 8px;
+  }
+}
+
+.torrent-stat-number {
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.torrent-stat-number-sm {
+  font-size: 16px;
+}
+
+.torrent-stat-label {
+  font-size: 11px;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.torrent-composition {
+  margin-bottom: 16px;
+  max-width: 280px;
+}
+
+.torrent-controls {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  h2 {
-    font-size: 18px;
-    margin: 0 60px 0 48px;
-    height: 48px;
-    line-height: 48px;
-    mat-icon {
-      position: relative;
-      top: 6px;
-      margin-right: 14px;
-      line-height: 1.25rem;
-    }
+  gap: 12px;
+  margin-bottom: 16px;
+
+  mat-button-toggle-group {
+    --mat-standard-button-toggle-height: 32px;
   }
-  nav {
-    flex: 0 0 100%;
-    a {
-      margin-top: 2px;
-      mat-icon {
-        margin-right: 12px;
-      }
-    }
-  }
+}
+
+.torrent-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.torrent-refresh-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.4;
+}
+
+.torrent-refresh-select {
+  width: 120px;
+  --mat-form-field-container-height: 32px;
+}
+
+.torrent-charts {
+  display: grid;
+  gap: 16px;
 }

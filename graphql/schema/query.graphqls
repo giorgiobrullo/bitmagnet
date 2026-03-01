@@ -13,6 +13,8 @@ type TorrentQuery {
   listSources: TorrentListSourcesResult!
   suggestTags(input: SuggestTagsQueryInput): TorrentSuggestTagsResult!
   metrics(input: TorrentMetricsQueryInput!): TorrentMetricsQueryResult!
+  libraryMetrics(input: TorrentLibraryMetricsInput!): TorrentLibraryMetricsResult!
+  contentBreakdown: [TorrentContentBreakdown!]!
 }
 
 input SuggestTagsQueryInput {

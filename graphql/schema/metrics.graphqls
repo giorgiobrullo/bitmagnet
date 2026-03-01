@@ -42,3 +42,24 @@ input TorrentMetricsQueryInput {
   startTime: DateTime
   endTime: DateTime
 }
+
+type TorrentLibrarySnapshot {
+  bucket: DateTime!
+  totalCount: Int!
+  totalSize: Float!
+}
+
+type TorrentLibraryMetricsResult {
+  snapshots: [TorrentLibrarySnapshot!]!
+}
+
+input TorrentLibraryMetricsInput {
+  bucketDuration: MetricsBucketDuration!
+  startTime: DateTime
+  endTime: DateTime
+}
+
+type TorrentContentBreakdown {
+  contentType: String!
+  count: Int!
+}
