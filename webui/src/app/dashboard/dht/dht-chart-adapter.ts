@@ -8,6 +8,14 @@ import { ThemeInfoService } from "../../themes/theme-info.service";
 import { resolveDateLocale } from "../../dates/dates.locales";
 import { DhtMetricsSnapshot } from "./dht-metrics.controller";
 
+/** Convert an rgb(...) string to rgba(..., alpha). */
+function withAlpha(rgb: string | undefined, alpha: number): string {
+  if (!rgb) return `rgba(128,128,128,${alpha})`;
+  const match = rgb.match(/\d+/g);
+  if (!match || match.length < 3) return `rgba(128,128,128,${alpha})`;
+  return `rgba(${match[0]},${match[1]},${match[2]},${alpha})`;
+}
+
 @Injectable({ providedIn: "root" })
 export class DhtChartAdapterNodes
   implements ChartAdapter<DhtMetricsSnapshot[], "line">
@@ -21,8 +29,10 @@ export class DhtChartAdapterNodes
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
     const foreground = colors["foreground"];
-    const gridColor =
-      colors[createThemeColor("neutral-variant", 50)] + "33";
+    const gridColor = withAlpha(
+      colors[createThemeColor("neutral-variant", 50)],
+      0.2,
+    );
     const labels: string[] = [];
     const ipv4Data: number[] = [];
     const ipv6Data: number[] = [];
@@ -41,6 +51,8 @@ export class DhtChartAdapterNodes
 
     const ipv4Label = "IPv4";
     const ipv6Label = "IPv6";
+    const ipv4Color = colors[createThemeColor("primary", 50)];
+    const ipv6Color = colors[createThemeColor("secondary", 50)];
 
     return {
       type: "line",
@@ -49,7 +61,7 @@ export class DhtChartAdapterNodes
         responsive: true,
         maintainAspectRatio: false,
         elements: {
-          line: { tension: 0.3 },
+          line: { tension: 0.3, borderWidth: 2 },
           point: { radius: 0, hitRadius: 8, hoverRadius: 4 },
         },
         scales: {
@@ -85,17 +97,16 @@ export class DhtChartAdapterNodes
             label: ipv4Label,
             data: ipv4Data,
             hidden: params.hiddenDatasets.get(ipv4Label) ?? false,
-            borderColor: colors[createThemeColor("primary", 50)],
-            backgroundColor: colors[createThemeColor("primary", 80)] + "33",
+            borderColor: ipv4Color,
+            backgroundColor: withAlpha(ipv4Color, 0.15),
             fill: "origin",
           },
           {
             label: ipv6Label,
             data: ipv6Data,
             hidden: params.hiddenDatasets.get(ipv6Label) ?? false,
-            borderColor: colors[createThemeColor("secondary", 50)],
-            backgroundColor:
-              colors[createThemeColor("secondary", 80)] + "33",
+            borderColor: ipv6Color,
+            backgroundColor: withAlpha(ipv6Color, 0.15),
             fill: "-1",
           },
         ],
@@ -117,8 +128,10 @@ export class DhtChartAdapterHashes
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
     const foreground = colors["foreground"];
-    const gridColor =
-      colors[createThemeColor("neutral-variant", 50)] + "33";
+    const gridColor = withAlpha(
+      colors[createThemeColor("neutral-variant", 50)],
+      0.2,
+    );
     const labels: string[] = [];
     const ipv4Data: number[] = [];
     const ipv6Data: number[] = [];
@@ -137,6 +150,8 @@ export class DhtChartAdapterHashes
 
     const ipv4Label = "IPv4";
     const ipv6Label = "IPv6";
+    const ipv4Color = colors[createThemeColor("tertiary", 50)];
+    const ipv6Color = colors[createThemeColor("caution", 50)];
 
     return {
       type: "line",
@@ -145,7 +160,7 @@ export class DhtChartAdapterHashes
         responsive: true,
         maintainAspectRatio: false,
         elements: {
-          line: { tension: 0.3 },
+          line: { tension: 0.3, borderWidth: 2 },
           point: { radius: 0, hitRadius: 8, hoverRadius: 4 },
         },
         scales: {
@@ -180,18 +195,16 @@ export class DhtChartAdapterHashes
             label: ipv4Label,
             data: ipv4Data,
             hidden: params.hiddenDatasets.get(ipv4Label) ?? false,
-            borderColor: colors[createThemeColor("tertiary", 50)],
-            backgroundColor:
-              colors[createThemeColor("tertiary", 80)] + "33",
+            borderColor: ipv4Color,
+            backgroundColor: withAlpha(ipv4Color, 0.1),
             fill: true,
           },
           {
             label: ipv6Label,
             data: ipv6Data,
             hidden: params.hiddenDatasets.get(ipv6Label) ?? false,
-            borderColor: colors[createThemeColor("caution", 50)],
-            backgroundColor:
-              colors[createThemeColor("caution", 80)] + "33",
+            borderColor: ipv6Color,
+            backgroundColor: withAlpha(ipv6Color, 0.1),
             fill: true,
           },
         ],

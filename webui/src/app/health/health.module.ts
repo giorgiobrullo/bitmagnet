@@ -17,8 +17,6 @@ import { GraphQLModule } from "../graphql/graphql.module";
 import { HealthCardComponent } from "./health-card.component";
 import { HealthSummaryComponent } from "./health-summary.component";
 import { HealthWidgetComponent } from "./health-widget.component";
-import { HealthService } from "./health.service";
-
 @NgModule({
   imports: [
     GraphQLModule,
@@ -43,7 +41,6 @@ import { HealthService } from "./health.service";
     HealthSummaryComponent,
     HealthWidgetComponent,
   ],
-  providers: [HealthService],
   exports: [HealthCardComponent, HealthSummaryComponent, HealthWidgetComponent],
 })
 export class HealthModule {}

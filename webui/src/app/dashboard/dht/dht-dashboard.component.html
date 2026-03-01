@@ -31,17 +31,6 @@
           <app-sparkline [data]="sparkTotalHashes" />
         </mat-card-content>
       </mat-card>
-      <mat-card class="dht-stat-card dht-composition-card">
-        <mat-card-content>
-          <app-chart
-            [title]="''"
-            [$data]="composition$"
-            [adapter]="compositionAdapter"
-            [height]="120"
-            [width]="120"
-          />
-        </mat-card-content>
-      </mat-card>
       <mat-card class="dht-stat-card">
         <mat-card-content>
           <div class="dht-stat-number" [class]="dhtStats.result.crawlerActive ? 'status-active' : 'status-inactive'">
@@ -94,18 +83,32 @@
       </div>
     </div>
 
-    <!-- Charts -->
-    <div class="dht-charts">
-      <app-chart
-        [title]="t('dashboard.dht.nodes_over_time')"
-        [$data]="snapshots$"
-        [adapter]="nodesChartAdapter"
-      />
-      <app-chart
-        [title]="t('dashboard.dht.hash_discovery')"
-        [$data]="snapshots$"
-        [adapter]="hashesChartAdapter"
-      />
+    <!-- Composition + Charts -->
+    <div class="dht-charts-row">
+      <mat-card class="dht-composition-card">
+        <mat-card-content>
+          <div class="dht-stat-label">{{ t("dashboard.dht.composition") }}</div>
+          <app-chart
+            [title]="''"
+            [$data]="composition$"
+            [adapter]="compositionAdapter"
+            [height]="160"
+            [width]="160"
+          />
+        </mat-card-content>
+      </mat-card>
+      <div class="dht-charts">
+        <app-chart
+          [title]="t('dashboard.dht.nodes_over_time')"
+          [$data]="snapshots$"
+          [adapter]="nodesChartAdapter"
+        />
+        <app-chart
+          [title]="t('dashboard.dht.hash_discovery')"
+          [$data]="snapshots$"
+          [adapter]="hashesChartAdapter"
+        />
+      </div>
     </div>
   </div>
 </ng-container>
