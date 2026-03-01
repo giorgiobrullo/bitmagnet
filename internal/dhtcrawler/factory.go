@@ -126,8 +126,10 @@ func New(params Params) Result {
 						blockingManager: blockingManager,
 						soughtNodeID:    &concurrency.AtomicValue[protocol.ID]{},
 						stopped:         make(chan struct{}),
-						persistedTotal:  persistedTotal,
-						logger:          params.Logger.Named("dht_crawler"),
+						persistedTotal:      persistedTotal,
+						dbSizeLimit:         params.Config.DBSizeLimit,
+						dbSizeCheckInterval: params.Config.DBSizeCheckInterval,
+						logger:              params.Logger.Named("dht_crawler"),
 					}
 					c.soughtNodeID.Set(protocol.RandomNodeID())
 

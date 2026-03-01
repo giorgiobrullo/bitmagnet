@@ -22,6 +22,11 @@ type Config struct {
 	// RescrapeThreshold is the amount of time that must pass before a torrent is rescraped
 	// to count seeders and leechers.
 	RescrapeThreshold time.Duration
+	// DBSizeLimit is the maximum database size in bytes before the crawler auto-suspends.
+	// 0 means no limit. Example: 10737418240 = 10 GB.
+	DBSizeLimit uint64
+	// DBSizeCheckInterval is how often to check the database size against the limit.
+	DBSizeCheckInterval time.Duration
 }
 
 func NewDefaultConfig() Config {
@@ -32,6 +37,8 @@ func NewDefaultConfig() Config {
 		SaveFilesThreshold:           100,
 		SavePieces:                   false,
 		RescrapeThreshold:            time.Hour * 24 * 30,
+		DBSizeLimit:                  0,
+		DBSizeCheckInterval:          5 * time.Minute,
 	}
 }
 

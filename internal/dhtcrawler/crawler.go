@@ -54,9 +54,11 @@ type crawler struct {
 	// soughtNodeID is a random node ID used as the target for find_node and sample_infohashes requests.
 	// It is rotated every 10 seconds.
 	soughtNodeID   *concurrency.AtomicValue[protocol.ID]
-	stopped        chan struct{}
-	persistedTotal *prometheus.CounterVec
-	logger         *zap.SugaredLogger
+	stopped             chan struct{}
+	persistedTotal      *prometheus.CounterVec
+	dbSizeLimit         uint64
+	dbSizeCheckInterval time.Duration
+	logger              *zap.SugaredLogger
 }
 
 func (c *crawler) start() {
@@ -78,6 +80,9 @@ func (c *crawler) start() {
 	go c.runPersistTorrents(ctx)
 	go c.runPersistSources(ctx)
 	go c.getOldNodes(ctx)
+	if c.dbSizeLimit > 0 {
+		go c.monitorDBSize(ctx)
+	}
 	<-c.stopped
 }
 
