@@ -6,6 +6,7 @@
 @use "./app/health/health-widget-component.theme";
 @use "./app/layout/layout-component.theme";
 @use "./app/dashboard/dashboard-component.theme";
+@use "./app/dashboard/dashboard-home-component.theme";
 @use "./app/dashboard/queue/queue-visualize-component.theme";
 @use "./app/themes/theme-emitter-component.theme";
 @use "app/torrents/torrents-search-component.theme";
@@ -29,6 +30,7 @@
   @include health-widget-component.theme($theme);
   @include layout-component.theme($theme);
   @include dashboard-component.theme($theme);
+  @include dashboard-home-component.theme($theme);
   @include queue-visualize-component.theme($theme);
   @include theme-emitter-component.theme($theme);
   @include torrents-search-component.theme($theme);

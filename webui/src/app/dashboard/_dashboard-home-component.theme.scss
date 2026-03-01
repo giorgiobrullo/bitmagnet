@@ -1,0 +1,33 @@
+@use "@angular/material" as mat;
+@use "sass:map";
+
+@mixin theme($theme) {
+  $is-dark: mat.get-theme-type($theme) == dark;
+
+  .dashboard-overview {
+    // Status colors
+    --dashboard-status-up: #{map.get($theme, success, 50)};
+    --dashboard-status-down: #{mat.get-theme-color($theme, error, 50)};
+    --dashboard-status-unknown: #{map.get($theme, caution, 50)};
+
+    // Card accent colors
+    --dashboard-accent-health: #{map.get($theme, success, 50)};
+    --dashboard-accent-dht: #{mat.get-theme-color($theme, primary, 50)};
+    --dashboard-accent-torrents: #{mat.get-theme-color($theme, secondary, 50)};
+    --dashboard-accent-queues: #{mat.get-theme-color($theme, tertiary, 50)};
+    --dashboard-accent-error: #{mat.get-theme-color($theme, error, 50)};
+    --dashboard-accent-warn: #{map.get($theme, caution, 50)};
+
+    @if $is-dark {
+      --dashboard-divider: #{mat.get-theme-color($theme, neutral-variant, 30)};
+    } @else {
+      --dashboard-divider: #{mat.get-theme-color($theme, neutral-variant, 80)};
+    }
+  }
+
+  .dht-dashboard {
+    --dht-accent: #{mat.get-theme-color($theme, primary, 50)};
+    --dht-status-active: #{map.get($theme, success, 50)};
+    --dht-status-inactive: #{mat.get-theme-color($theme, neutral, 50)};
+  }
+}

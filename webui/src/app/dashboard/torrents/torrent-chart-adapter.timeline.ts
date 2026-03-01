@@ -32,6 +32,9 @@ export class TorrentChartAdapterTimeline
     params: FactoryParams,
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
+    const foreground = colors["foreground"];
+    const gridColor =
+      colors[createThemeColor("neutral-variant", 50)] + "33";
     const labels = Array<string>();
     const datasets: ChartConfiguration<"line">["data"]["datasets"] = [];
     if (result) {
@@ -105,20 +108,27 @@ export class TorrentChartAdapterTimeline
           },
         },
         scales: {
+          x: {
+            ticks: { color: foreground },
+            grid: { color: gridColor },
+          },
           yCount: {
             position: "left",
             ticks: {
+              color: foreground,
               callback: (v) =>
                 parseInt(v as string).toLocaleString(
                   this.transloco.getActiveLang(),
                 ),
             },
+            grid: { color: gridColor },
           },
         },
         plugins: {
           legend: {
             display: params.legend,
             onClick: params.legendOnClick,
+            labels: { color: foreground },
           },
           decimation: {
             enabled: true,

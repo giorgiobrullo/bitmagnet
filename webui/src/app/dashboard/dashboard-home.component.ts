@@ -21,6 +21,14 @@ export class DashboardHomeComponent implements OnInit, OnDestroy {
   private apollo = inject(Apollo);
   private subscriptions: Subscription[] = [];
 
+  get healthAccent(): string {
+    const s = this.health.result.status;
+    if (s === "up") return "accent-health";
+    if (s === "down" || s === "error" || s === "degraded") return "accent-error";
+    if (s === "unknown") return "accent-warn";
+    return "";
+  }
+
   torrentCount24h = 0;
   torrentUpdated24h = 0;
   queueProcessed24h = 0;

@@ -27,6 +27,9 @@ export class DhtChartAdapterNodes
     params: FactoryParams,
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
+    const foreground = colors["foreground"];
+    const gridColor =
+      colors[createThemeColor("neutral-variant", 50)] + "33";
     const labels: string[] = [];
     const ipv4Data: number[] = [];
     const ipv6Data: number[] = [];
@@ -54,21 +57,28 @@ export class DhtChartAdapterNodes
           point: { radius: 0 },
         },
         scales: {
+          x: {
+            ticks: { color: foreground },
+            grid: { color: gridColor },
+          },
           y: {
             position: "left",
             beginAtZero: false,
             ticks: {
+              color: foreground,
               callback: (v) =>
                 parseInt(v as string).toLocaleString(
                   this.transloco.getActiveLang(),
                 ),
             },
+            grid: { color: gridColor },
           },
         },
         plugins: {
           legend: {
             display: params.legend,
             onClick: params.legendOnClick,
+            labels: { color: foreground },
           },
           decimation: { enabled: true },
         },
@@ -111,6 +121,9 @@ export class DhtChartAdapterHashes
     params: FactoryParams,
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
+    const foreground = colors["foreground"];
+    const gridColor =
+      colors[createThemeColor("neutral-variant", 50)] + "33";
     const labels: string[] = [];
     const ipv4Data: number[] = [];
     const ipv6Data: number[] = [];
@@ -138,21 +151,28 @@ export class DhtChartAdapterHashes
           point: { radius: 0 },
         },
         scales: {
+          x: {
+            ticks: { color: foreground },
+            grid: { color: gridColor },
+          },
           y: {
             position: "left",
             beginAtZero: false,
             ticks: {
+              color: foreground,
               callback: (v) =>
                 parseInt(v as string).toLocaleString(
                   this.transloco.getActiveLang(),
                 ),
             },
+            grid: { color: gridColor },
           },
         },
         plugins: {
           legend: {
             display: params.legend,
             onClick: params.legendOnClick,
+            labels: { color: foreground },
           },
           decimation: { enabled: true },
         },

@@ -27,6 +27,9 @@ export class QueueChartAdapterTotals implements ChartAdapter<Result> {
     params: FactoryParams,
   ): ChartConfiguration<"bar"> {
     const { colors } = this.themeInfo.info;
+    const foreground = colors["foreground"];
+    const gridColor =
+      colors[createThemeColor("neutral-variant", 50)] + "33";
     const labels = Array<string>();
     const datasets: ChartConfiguration<"bar">["data"]["datasets"] = [];
     if (result) {
@@ -72,18 +75,24 @@ export class QueueChartAdapterTotals implements ChartAdapter<Result> {
         scales: {
           x: {
             ticks: {
+              color: foreground,
               callback: (v) =>
                 parseInt(v as string).toLocaleString(
                   this.transloco.getActiveLang(),
                 ),
             },
+            grid: { color: gridColor },
           },
-          y: {},
+          y: {
+            ticks: { color: foreground },
+            grid: { color: gridColor },
+          },
         },
         indexAxis: "y",
         plugins: {
           legend: {
             display: params.legend,
+            labels: { color: foreground },
           },
         },
       },

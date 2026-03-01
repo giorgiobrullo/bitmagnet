@@ -3,7 +3,7 @@
   <div class="dashboard-overview">
     <div class="stats-grid">
       <!-- System Health Card -->
-      <mat-card class="stat-card">
+      <mat-card class="stat-card" [ngClass]="healthAccent">
         <mat-card-header>
           <mat-icon class="stat-card-icon" [class]="'health-status-' + health.result.status">monitor_heart</mat-icon>
           <mat-card-title>{{ t("health.summary") }}</mat-card-title>
@@ -33,7 +33,7 @@
       </mat-card>
 
       <!-- DHT Network Card -->
-      <mat-card class="stat-card stat-card-link" routerLink="dht">
+      <mat-card class="stat-card stat-card-link accent-dht" routerLink="dht">
         <mat-card-header>
           <mat-icon class="stat-card-icon">hub</mat-icon>
           <mat-card-title>{{ t("routes.dht") }}</mat-card-title>
@@ -65,7 +65,7 @@
       </mat-card>
 
       <!-- Torrents Card -->
-      <mat-card class="stat-card stat-card-link" routerLink="torrents">
+      <mat-card class="stat-card stat-card-link accent-torrents" routerLink="torrents">
         <mat-card-header>
           <mat-icon class="stat-card-icon" svgIcon="magnet"></mat-icon>
           <mat-card-title>{{ t("routes.torrents") }}</mat-card-title>
@@ -83,7 +83,7 @@
       </mat-card>
 
       <!-- Queue Card -->
-      <mat-card class="stat-card stat-card-link" routerLink="queues">
+      <mat-card class="stat-card stat-card-link accent-queues" routerLink="queues">
         <mat-card-header>
           <mat-icon class="stat-card-icon" svgIcon="queue"></mat-icon>
           <mat-card-title>{{ t("routes.queues") }}</mat-card-title>

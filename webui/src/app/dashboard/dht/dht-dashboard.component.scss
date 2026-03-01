@@ -5,43 +5,44 @@
 .dht-stats-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   margin-bottom: 24px;
 }
 
 .dht-stat-card {
   text-align: center;
+  border-top: 2px solid var(--dht-accent, transparent);
 
   mat-card-content {
-    padding: 16px 12px;
+    padding: 14px 12px;
   }
 }
 
 .dht-stat-number {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
 
 .dht-stat-number-sm {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .dht-stat-label {
-  font-size: 12px;
-  opacity: 0.6;
+  font-size: 11px;
+  opacity: 0.5;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 4px;
 }
 
 .status-active {
-  color: #4caf50;
+  color: var(--dht-status-active, #4caf50);
 }
 
 .status-inactive {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .dht-charts {
