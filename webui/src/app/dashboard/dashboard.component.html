@@ -23,6 +23,16 @@
           <li>
             <a
               mat-button
+              routerLink="dht"
+              routerLinkActive
+              #linkDht="routerLinkActive"
+              [class]="linkDht.isActive ? 'active' : ''"
+              ><mat-icon>hub</mat-icon>{{ t("routes.dht") }}</a
+            >
+          </li>
+          <li>
+            <a
+              mat-button
               routerLink="queues"
               routerLinkActive
               #linkQueues="routerLinkActive"

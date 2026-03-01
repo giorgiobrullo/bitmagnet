@@ -27,6 +27,17 @@ type ContentTypeFacetInput struct {
 	Filter    graphql.Omittable[[]*model.ContentType] `json:"filter,omitempty"`
 }
 
+type DhtStats struct {
+	NodesCountIPv4     int        `json:"nodesCountIPv4"`
+	NodesCountIPv6     int        `json:"nodesCountIPv6"`
+	HashesCountIPv4    int        `json:"hashesCountIPv4"`
+	HashesCountIPv6    int        `json:"hashesCountIPv6"`
+	ServerStartTime    *time.Time `json:"serverStartTime,omitempty"`
+	ServerLastSuccess  *time.Time `json:"serverLastSuccess,omitempty"`
+	ServerLastResponse *time.Time `json:"serverLastResponse,omitempty"`
+	CrawlerActive      bool       `json:"crawlerActive"`
+}
+
 type GenreAgg struct {
 	Value      string `json:"value"`
 	Label      string `json:"label"`
@@ -164,7 +175,7 @@ type TorrentContentFacetsInput struct {
 	VideoResolution graphql.Omittable[*VideoResolutionFacetInput] `json:"videoResolution,omitempty"`
 	VideoSource     graphql.Omittable[*VideoSourceFacetInput]     `json:"videoSource,omitempty"`
 	SizeRange       graphql.Omittable[*SizeRangeInput]            `json:"sizeRange,omitempty"`
-	PublishedAt     graphql.Omittable[*string]                   `json:"publishedAt,omitempty"`
+	PublishedAt     graphql.Omittable[*string]                    `json:"publishedAt,omitempty"`
 }
 
 type TorrentContentOrderByInput struct {

@@ -5,6 +5,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/database/dao"
 	"github.com/bitmagnet-io/bitmagnet/internal/database/search"
 	"github.com/bitmagnet-io/bitmagnet/internal/health"
+	"github.com/bitmagnet-io/bitmagnet/internal/metrics/dhtmetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/metrics/queuemetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/metrics/torrentmetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/processor"
@@ -21,6 +22,7 @@ type Resolver struct {
 	Search               search.Search
 	Workers              worker.Registry
 	Checker              health.Checker
+	DhtMetricsClient     dhtmetrics.Client
 	QueueMetricsClient   queuemetrics.Client
 	QueueManager         manager.Manager
 	TorrentMetricsClient torrentmetrics.Client

@@ -1,0 +1,66 @@
+<ng-container *transloco="let t">
+  <app-document-title [parts]="[t('routes.dashboard'), t('routes.dht')]" />
+  <div class="dht-dashboard">
+    <!-- Live Stats -->
+    <div class="dht-stats-grid">
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv4 + dhtStats.result.nodesCountIPv6 | number }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.total_nodes") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv4 | number }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.nodes_ipv4") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv6 | number }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.nodes_ipv6") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number">{{ dhtStats.result.hashesCountIPv4 + dhtStats.result.hashesCountIPv6 | number }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.total_hashes") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number" [class]="dhtStats.result.crawlerActive ? 'status-active' : 'status-inactive'">
+            {{ t(dhtStats.result.crawlerActive ? "dashboard.dht.active" : "dashboard.dht.inactive") }}
+          </div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.crawler_status") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number dht-stat-number-sm">{{ serverUptime || "—" }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.server_uptime") }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card">
+        <mat-card-content>
+          <div class="dht-stat-number dht-stat-number-sm">{{ lastSuccess || "—" }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.last_success") }}</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts -->
+    <div class="dht-charts">
+      <app-chart
+        [title]="t('dashboard.dht.nodes')"
+        [$data]="dataPoints$"
+        [adapter]="nodesChartAdapter"
+      />
+      <app-chart
+        [title]="t('dashboard.dht.hashes')"
+        [$data]="dataPoints$"
+        [adapter]="hashesChartAdapter"
+      />
+    </div>
+  </div>
+</ng-container>

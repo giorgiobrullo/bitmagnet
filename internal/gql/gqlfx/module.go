@@ -11,6 +11,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/gql/resolvers"
 	"github.com/bitmagnet-io/bitmagnet/internal/health"
 	"github.com/bitmagnet-io/bitmagnet/internal/lazy"
+	"github.com/bitmagnet-io/bitmagnet/internal/metrics/dhtmetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/metrics/queuemetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/metrics/torrentmetrics"
 	"github.com/bitmagnet-io/bitmagnet/internal/processor"
@@ -78,6 +79,7 @@ func New() fx.Option {
 							Dao:                  d,
 							Search:               s,
 							Checker:              ch,
+							DhtMetricsClient:     p.DhtMetricsClient,
 							QueueMetricsClient:   qmc,
 							QueueManager:         qm,
 							TorrentMetricsClient: tm,
@@ -106,6 +108,7 @@ type Params struct {
 	Search               lazy.Lazy[search.Search]
 	Dao                  lazy.Lazy[*dao.Query]
 	Checker              lazy.Lazy[health.Checker]
+	DhtMetricsClient     dhtmetrics.Client
 	QueueMetricsClient   lazy.Lazy[queuemetrics.Client]
 	QueueManager         lazy.Lazy[manager.Manager]
 	TorrentMetricsClient lazy.Lazy[torrentmetrics.Client]

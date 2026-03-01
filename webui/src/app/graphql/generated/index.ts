@@ -94,6 +94,23 @@ export type ContentTypeFacetInput = {
   filter?: InputMaybe<Array<InputMaybe<ContentType>>>;
 };
 
+export type DhtQuery = {
+  __typename?: 'DhtQuery';
+  stats: DhtStats;
+};
+
+export type DhtStats = {
+  __typename?: 'DhtStats';
+  crawlerActive: Scalars['Boolean']['output'];
+  hashesCountIPv4: Scalars['Int']['output'];
+  hashesCountIPv6: Scalars['Int']['output'];
+  nodesCountIPv4: Scalars['Int']['output'];
+  nodesCountIPv6: Scalars['Int']['output'];
+  serverLastResponse?: Maybe<Scalars['DateTime']['output']>;
+  serverLastSuccess?: Maybe<Scalars['DateTime']['output']>;
+  serverStartTime?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type Episodes = {
   __typename?: 'Episodes';
   label: Scalars['String']['output'];
@@ -262,6 +279,7 @@ export type Mutation = {
 
 export type Query = {
   __typename?: 'Query';
+  dht: DhtQuery;
   health: HealthQuery;
   queue: QueueQuery;
   torrent: TorrentQuery;
@@ -937,6 +955,11 @@ export type TorrentSetTagsMutationVariables = Exact<{
 
 export type TorrentSetTagsMutation = { __typename?: 'Mutation', torrent: { __typename?: 'TorrentMutation', setTags?: void | null } };
 
+export type DhtStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DhtStatsQuery = { __typename?: 'Query', dht: { __typename?: 'DhtQuery', stats: { __typename?: 'DhtStats', nodesCountIPv4: number, nodesCountIPv6: number, hashesCountIPv4: number, hashesCountIPv6: number, serverStartTime?: string | null, serverLastSuccess?: string | null, serverLastResponse?: string | null, crawlerActive: boolean } } };
+
 export type HealthCheckQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1344,6 +1367,33 @@ export const TorrentSetTagsDocument = gql`
   })
   export class TorrentSetTagsGQL extends Apollo.Mutation<TorrentSetTagsMutation, TorrentSetTagsMutationVariables> {
     override document = TorrentSetTagsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DhtStatsDocument = gql`
+    query DhtStats {
+  dht {
+    stats {
+      nodesCountIPv4
+      nodesCountIPv6
+      hashesCountIPv4
+      hashesCountIPv6
+      serverStartTime
+      serverLastSuccess
+      serverLastResponse
+      crawlerActive
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DhtStatsGQL extends Apollo.Query<DhtStatsQuery, DhtStatsQueryVariables> {
+    override document = DhtStatsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

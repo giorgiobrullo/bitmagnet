@@ -1,0 +1,51 @@
+.dht-dashboard {
+  padding: 16px;
+}
+
+.dht-stats-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 24px;
+}
+
+.dht-stat-card {
+  text-align: center;
+
+  mat-card-content {
+    padding: 16px 12px;
+  }
+}
+
+.dht-stat-number {
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.dht-stat-number-sm {
+  font-size: 18px;
+}
+
+.dht-stat-label {
+  font-size: 12px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.status-active {
+  color: #4caf50;
+}
+
+.status-inactive {
+  opacity: 0.5;
+}
+
+.dht-charts {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}

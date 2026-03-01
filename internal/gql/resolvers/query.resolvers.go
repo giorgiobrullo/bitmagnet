@@ -84,6 +84,11 @@ func (r *queryResolver) Health(ctx context.Context) (gen.HealthQuery, error) {
 	return result, nil
 }
 
+// Dht is the resolver for the dht field.
+func (r *queryResolver) Dht(ctx context.Context) (gqlmodel.DhtQuery, error) {
+	return gqlmodel.DhtQuery{DhtMetricsClient: r.DhtMetricsClient}, nil
+}
+
 // Queue is the resolver for the queue field.
 func (r *queryResolver) Queue(ctx context.Context) (gqlmodel.QueueQuery, error) {
 	return gqlmodel.QueueQuery{QueueMetricsClient: r.QueueMetricsClient}, nil

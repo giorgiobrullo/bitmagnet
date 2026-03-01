@@ -1,20 +1,108 @@
 <ng-container *transloco="let t">
   <app-document-title [parts]="[t('routes.dashboard')]" />
-  <mat-card class="dashboard-card">
-    <mat-card-header>
-      <mat-toolbar>
-        <h2><mat-icon>dashboard</mat-icon>{{ t("routes.dashboard") }}</h2>
-      </mat-toolbar>
-    </mat-card-header>
-    <mat-card-content>
-      <mat-divider></mat-divider>
-      <div class="grid-container">
-        <mat-grid-list cols="1" rowHeight="500px">
-          <mat-grid-tile [colspan]="1" [rowspan]="1">
-            <app-health-card></app-health-card>
-          </mat-grid-tile>
-        </mat-grid-list>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  <div class="dashboard-overview">
+    <div class="stats-grid">
+      <!-- System Health Card -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-icon class="stat-card-icon" [class]="'health-status-' + health.result.status">monitor_heart</mat-icon>
+          <mat-card-title>{{ t("health.summary") }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-row stat-row-primary">
+            <span class="stat-label">{{ t("general.status") }}</span>
+            <span class="stat-value" [class]="'health-status-' + health.result.status">
+              {{ t("health.statuses." + health.result.status) }}
+            </span>
+          </div>
+          <div class="stat-checks">
+            @for (check of health.result.checks; track check.key) {
+              <div class="stat-check">
+                <mat-icon [class]="'health-status-' + check.status" class="stat-check-icon">{{ check.icon }}</mat-icon>
+                <span class="stat-check-label">{{ t("health.components." + check.key, { fallback: check.key }) }}</span>
+              </div>
+            }
+            @for (worker of health.result.workers; track worker.key) {
+              <div class="stat-check">
+                <mat-icon [class]="worker.started ? 'health-status-up' : 'health-status-inactive'" class="stat-check-icon">{{ worker.icon }}</mat-icon>
+                <span class="stat-check-label">{{ t("health.workers." + worker.key, { fallback: worker.key }) }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- DHT Network Card -->
+      <mat-card class="stat-card stat-card-link" routerLink="dht">
+        <mat-card-header>
+          <mat-icon class="stat-card-icon">hub</mat-icon>
+          <mat-card-title>{{ t("routes.dht") }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-row stat-row-primary">
+            <span class="stat-label">{{ t("dashboard.dht.nodes") }}</span>
+            <span class="stat-value stat-value-large">{{ dhtStats.result.nodesCountIPv4 + dhtStats.result.nodesCountIPv6 | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.dht.nodes_ipv4") }}</span>
+            <span class="stat-value">{{ dhtStats.result.nodesCountIPv4 | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.dht.nodes_ipv6") }}</span>
+            <span class="stat-value">{{ dhtStats.result.nodesCountIPv6 | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.dht.hashes") }}</span>
+            <span class="stat-value">{{ dhtStats.result.hashesCountIPv4 + dhtStats.result.hashesCountIPv6 | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.dht.crawler_status") }}</span>
+            <span class="stat-value" [class]="dhtStats.result.crawlerActive ? 'health-status-up' : 'health-status-inactive'">
+              {{ t(dhtStats.result.crawlerActive ? "dashboard.dht.active" : "dashboard.dht.inactive") }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Torrents Card -->
+      <mat-card class="stat-card stat-card-link" routerLink="torrents">
+        <mat-card-header>
+          <mat-icon class="stat-card-icon" svgIcon="magnet"></mat-icon>
+          <mat-card-title>{{ t("routes.torrents") }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-row stat-row-primary">
+            <span class="stat-label">{{ t("dashboard.event.created") }} (24h)</span>
+            <span class="stat-value stat-value-large">{{ torrentCount24h | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.event.updated") }} (24h)</span>
+            <span class="stat-value">{{ torrentUpdated24h | number }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Queue Card -->
+      <mat-card class="stat-card stat-card-link" routerLink="queues">
+        <mat-card-header>
+          <mat-icon class="stat-card-icon" svgIcon="queue"></mat-icon>
+          <mat-card-title>{{ t("routes.queues") }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-row stat-row-primary">
+            <span class="stat-label">{{ t("dashboard.queues.processed") }} (24h)</span>
+            <span class="stat-value stat-value-large">{{ queueProcessed24h | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.queues.pending") }}</span>
+            <span class="stat-value">{{ queuePending | number }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">{{ t("dashboard.queues.failed") }} (24h)</span>
+            <span class="stat-value">{{ queueFailed24h | number }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
 </ng-container>

@@ -54,6 +54,22 @@
     "custom_range": "Custom Range"
   },
   "dashboard": {
+    "dht": {
+      "nodes": "Nodes",
+      "nodes_ipv4": "IPv4 Nodes",
+      "nodes_ipv6": "IPv6 Nodes",
+      "hashes": "Hashes",
+      "hashes_ipv4": "IPv4 Hashes",
+      "hashes_ipv6": "IPv6 Hashes",
+      "crawler_status": "Crawler",
+      "server_uptime": "Server Uptime",
+      "last_success": "Last Success",
+      "last_response": "Last Response",
+      "active": "Active",
+      "inactive": "Inactive",
+      "total_nodes": "Total Nodes",
+      "total_hashes": "Total Hashes"
+    },
     "event": {
       "created": "Created",
       "failed": "Failed",
@@ -255,6 +271,7 @@
   "routes": {
     "admin": "Admin",
     "dashboard": "Dashboard",
+    "dht": "DHT Network",
     "home": "Home",
     "jobs": "Jobs",
     "queues": "Queues",

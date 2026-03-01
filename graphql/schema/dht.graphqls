@@ -1,0 +1,14 @@
+type DhtStats {
+  nodesCountIPv4: Int!
+  nodesCountIPv6: Int!
+  hashesCountIPv4: Int!
+  hashesCountIPv6: Int!
+  serverStartTime: DateTime
+  serverLastSuccess: DateTime
+  serverLastResponse: DateTime
+  crawlerActive: Boolean!
+}
+
+type DhtQuery {
+  stats: DhtStats!
+}

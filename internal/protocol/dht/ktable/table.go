@@ -21,6 +21,11 @@ type TableCommand interface {
 	PutHash(id ID, peers []HashPeer, options ...HashOption) btree.PutResult
 }
 
+type TableStats struct {
+	NodesCount  int
+	HashesCount int
+}
+
 type TableQuery interface {
 	GetClosestNodes(id ID) []Node
 	GetOldestNodes(cutoff time.Time, n int) []Node
@@ -30,6 +35,8 @@ type TableQuery interface {
 	SampleHashesAndNodes() SampleHashesAndNodesResult
 	// FilterKnownAddrs returns only the addresses not already known to this table.
 	FilterKnownAddrs(addrs []netip.Addr) []netip.Addr
+	// Stats returns the current node and hash counts.
+	Stats() TableStats
 }
 
 type Table interface {
@@ -161,4 +168,14 @@ func (t *table) FilterKnownAddrs(addrs []netip.Addr) []netip.Addr {
 		}
 	}
 	return unknown
+}
+
+func (t *table) Stats() TableStats {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	return TableStats{
+		NodesCount:  t.nodes.count(),
+		HashesCount: t.hashes.count(),
+	}
 }

@@ -2,6 +2,7 @@ type Query {
   version: String!
   workers: WorkersQuery!
   health: HealthQuery!
+  dht: DhtQuery!
   queue: QueueQuery!
   torrent: TorrentQuery!
   torrentContent: TorrentContentQuery!

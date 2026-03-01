@@ -42,6 +42,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "dht",
+        loadComponent: () =>
+          import("./dashboard/dht/dht-dashboard.component").then(
+            (c) => c.DhtDashboardComponent,
+          ),
+      },
+      {
         path: "queues",
         pathMatch: "full",
         redirectTo: "queues/visualize",

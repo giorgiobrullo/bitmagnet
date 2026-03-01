@@ -1,0 +1,14 @@
+query DhtStats {
+  dht {
+    stats {
+      nodesCountIPv4
+      nodesCountIPv6
+      hashesCountIPv4
+      hashesCountIPv6
+      serverStartTime
+      serverLastSuccess
+      serverLastResponse
+      crawlerActive
+    }
+  }
+}

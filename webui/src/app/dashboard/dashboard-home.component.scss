@@ -1,28 +1,122 @@
-.grid-container {
-  margin: 20px;
+.dashboard-overview {
+  padding: 16px;
 }
 
-.more-button {
-  position: absolute;
-  top: 5px;
-  right: 10px;
+.stats-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-app-health-card {
-  width: 100%;
-  height: 100%;
-  mat-card {
-    height: 100%;
+.stat-card {
+  cursor: default;
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .stat-card-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.7;
+  }
+
+  mat-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
   }
 }
 
-mat-grid-tile mat-card {
-  width: 100%;
+.stat-card-link {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow:
+      0 3px 5px -1px rgba(0, 0, 0, 0.2),
+      0 6px 10px 0 rgba(0, 0, 0, 0.14),
+      0 1px 18px 0 rgba(0, 0, 0, 0.12);
+  }
 }
 
-mat-toolbar h2 mat-icon {
-  position: relative;
-  top: 3px;
-  margin-right: 14px;
-  margin-left: 32px;
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.stat-row-primary {
+  padding: 8px 0 12px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value-large {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.stat-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.stat-check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-check-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.stat-check-label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.health-status-up {
+  color: #4caf50;
+}
+
+.health-status-down,
+.health-status-error,
+.health-status-degraded {
+  color: #f44336;
+}
+
+.health-status-unknown {
+  color: #ff9800;
+}
+
+.health-status-inactive {
+  opacity: 0.5;
+}
+
+.health-status-started {
+  color: #4caf50;
 }
