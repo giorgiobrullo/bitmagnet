@@ -108,6 +108,10 @@ workflows:
                 condition: "flags.apis_enabled && flags.llm_enabled && !result.hasBaseTitle"
                 if_action: classify_with_llm
                 else_action: unmatched
+    # LLM title extraction for non-video content that has a known type but no base title yet:
+    - if_else:
+        condition: "flags.apis_enabled && flags.llm_enabled && !result.hasBaseTitle && result.contentType != contentType.unknown"
+        if_action: classify_with_llm
     # if content isn't already attached, and a base title has been parsed, then search for the content, either from the local `content` table or an API integration:
     - if_else:
         condition: "!result.hasAttachedContent && result.hasBaseTitle"
