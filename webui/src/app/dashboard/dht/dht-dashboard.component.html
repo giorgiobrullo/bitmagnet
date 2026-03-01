@@ -47,53 +47,52 @@
       </mat-card>
     </div>
 
-    <!-- Controls row: timeframe left, doughnut right -->
-    <div class="dht-controls-row">
-      <div class="dht-controls">
-        <mat-button-toggle-group
-          [value]="metricsController.params.timeframe"
-          (change)="metricsController.setTimeframe($event.value)"
-        >
-          @for (name of timeframeNames; track name) {
-            <mat-button-toggle [value]="name">
-              {{ t("dashboard.interval." + name) }}
-            </mat-button-toggle>
-          }
-        </mat-button-toggle-group>
+    <!-- Controls -->
+    <div class="dht-controls">
+      <mat-button-toggle-group
+        [value]="metricsController.params.timeframe"
+        (change)="metricsController.setTimeframe($event.value)"
+      >
+        @for (name of timeframeNames; track name) {
+          <mat-button-toggle [value]="name">
+            {{ t("dashboard.interval." + name) }}
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
 
-        <div class="dht-controls-right">
-          <mat-icon class="dht-refresh-icon">autorenew</mat-icon>
-          <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
-            <mat-select
-              [value]="metricsController.params.autoRefresh"
-              (valueChange)="metricsController.setAutoRefreshInterval($event)"
-            >
-              @for (name of autoRefreshIntervalNames; track name) {
-                <mat-option [value]="name">
-                  {{ t("dashboard.interval." + name) }}
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <button
-            mat-icon-button
-            (click)="metricsController.refresh()"
-            matTooltip="Refresh"
+      <div class="dht-controls-right">
+        <mat-icon class="dht-refresh-icon">autorenew</mat-icon>
+        <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
+          <mat-select
+            [value]="metricsController.params.autoRefresh"
+            (valueChange)="metricsController.setAutoRefreshInterval($event)"
           >
-            <mat-icon>sync</mat-icon>
-          </button>
-        </div>
+            @for (name of autoRefreshIntervalNames; track name) {
+              <mat-option [value]="name">
+                {{ t("dashboard.interval." + name) }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-icon-button
+          (click)="metricsController.refresh()"
+          matTooltip="Refresh"
+        >
+          <mat-icon>sync</mat-icon>
+        </button>
       </div>
+    </div>
 
-      <div class="dht-composition">
-        <app-chart
-          [title]="''"
-          [$data]="composition$"
-          [adapter]="compositionAdapter"
-          [height]="100"
-          [width]="100"
-        />
-      </div>
+    <!-- Composition -->
+    <div class="dht-composition">
+      <app-chart
+        [title]="''"
+        [$data]="composition$"
+        [adapter]="compositionAdapter"
+        [height]="150"
+        [width]="150"
+      />
     </div>
 
     <!-- Charts -->
