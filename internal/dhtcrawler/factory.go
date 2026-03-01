@@ -14,6 +14,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/protocol/dht/ktable"
 	"github.com/bitmagnet-io/bitmagnet/internal/protocol/metainfo/banning"
 	"github.com/bitmagnet-io/bitmagnet/internal/protocol/metainfo/metainforequester"
+	"github.com/bitmagnet-io/bitmagnet/internal/rand"
 	"github.com/bitmagnet-io/bitmagnet/internal/worker"
 	"github.com/prometheus/client_golang/prometheus"
 	boom "github.com/tylertreat/BoomFilters"
@@ -24,7 +25,8 @@ import (
 type Params struct {
 	fx.In
 	Config            Config
-	KTable            ktable.Table
+	KTable            ktable.Table `name:"ipv4"`
+	KTable6           ktable.Table `name:"ipv6"`
 	Client            lazy.Lazy[client.Client]
 	MetainfoRequester metainforequester.Requester
 	BanningChecker    banning.Checker `name:"metainfo_banning_checker"`
@@ -77,6 +79,7 @@ func New(params Params) Result {
 					}
 					c = crawler{
 						kTable:                       params.KTable,
+						kTable6:                      params.KTable6,
 						client:                       cl,
 						metainfoRequester:            params.MetainfoRequester,
 						banningChecker:               params.BanningChecker,
@@ -125,11 +128,12 @@ func New(params Params) Result {
 						},
 						blockingManager: blockingManager,
 						soughtNodeID:    &concurrency.AtomicValue[protocol.ID]{},
-						stopped:         make(chan struct{}),
+						stopped:             make(chan struct{}),
 						persistedTotal:      persistedTotal,
 						dbSizeLimit:         params.Config.DBSizeLimit,
 						dbSizeCheckInterval: params.Config.DBSizeCheckInterval,
 						logger:              params.Logger.Named("dht_crawler"),
+						rand:                rand.NewCryptoSeededRand(),
 					}
 					c.soughtNodeID.Set(protocol.RandomNodeID())
 
