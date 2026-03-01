@@ -14,8 +14,10 @@ func TorrentContentEpisodesCriteria(episodes model.Episodes) query.Criteria {
 
 		for _, s := range episodes.SeasonEntries() {
 			if len(s.Episodes) == 0 {
+				// Match any torrent containing this season, regardless of specific episodes.
+				// Uses the ? operator to check if the season key exists in the JSONB object.
 				and = append(and, query.DBCriteria{
-					SQL: fmt.Sprintf("torrent_contents.episodes #> '{%d}' = '{}'::jsonb", s.Season),
+					SQL: fmt.Sprintf("torrent_contents.episodes ? '%d'", s.Season),
 				})
 			} else {
 				keyParts := make([]string, 0, len(s.Episodes))
