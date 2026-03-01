@@ -183,49 +183,17 @@ func (c configSourceProvider) source() (Source, error) {
 		fs["delete_xxx"] = true
 	}
 
-	if !c.tmdbEnabled {
-		fs["tmdb_enabled"] = false
-	}
-
-	if !c.llmEnabled {
-		fs["llm_enabled"] = false
-	}
-
-	if !c.porndbEnabled {
-		fs["porndb_enabled"] = false
-	}
-
-	if !c.stashdbEnabled {
-		fs["stashdb_enabled"] = false
-	}
-
-	if !c.musicbrainzEnabled {
-		fs["musicbrainz_enabled"] = false
-	}
-
-	if !c.openlibraryEnabled {
-		fs["openlibrary_enabled"] = false
-	}
-
-	if !c.comicvineEnabled {
-		fs["comicvine_enabled"] = false
-	}
-
-	if !c.igdbEnabled {
-		fs["igdb_enabled"] = false
-	}
-
-	if !c.anilistEnabled {
-		fs["anilist_enabled"] = false
-	}
-
-	if !c.jikanEnabled {
-		fs["jikan_enabled"] = false
-	}
-
-	if !c.googlebooksEnabled {
-		fs["googlebooks_enabled"] = false
-	}
+	fs["tmdb_enabled"] = c.tmdbEnabled
+	fs["llm_enabled"] = c.llmEnabled
+	fs["porndb_enabled"] = c.porndbEnabled
+	fs["stashdb_enabled"] = c.stashdbEnabled
+	fs["musicbrainz_enabled"] = c.musicbrainzEnabled
+	fs["openlibrary_enabled"] = c.openlibraryEnabled
+	fs["comicvine_enabled"] = c.comicvineEnabled
+	fs["igdb_enabled"] = c.igdbEnabled
+	fs["anilist_enabled"] = c.anilistEnabled
+	fs["jikan_enabled"] = c.jikanEnabled
+	fs["googlebooks_enabled"] = c.googlebooksEnabled
 
 	return Source{
 		Keywords:           c.config.Keywords,
