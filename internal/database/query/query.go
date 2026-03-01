@@ -814,6 +814,12 @@ func (b optionBuilder) shouldTryCteStrategy() bool {
 		return false
 	}
 
+	// Skip CTE strategy when offset is too high — the CTE materializes at most 50k rows,
+	// so offsets beyond that would return zero results and trigger a misleading 500 error.
+	if b.offset >= 50_000 {
+		return false
+	}
+
 	for _, f := range b.facets {
 		if f.TriggersCte() && len(f.Filter()) > 0 {
 			return true
