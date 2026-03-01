@@ -43,8 +43,26 @@ type Result struct {
 
 	DhtCrawlerActive *concurrency.AtomicValue[bool] `name:"dht_crawler_active"`
 
-	PersistedTotal prometheus.Collector `group:"prometheus_collectors"`
+	PersistedTotal            prometheus.Collector `group:"prometheus_collectors"`
+	DiscoveredNodesTotal      prometheus.Collector `group:"prometheus_collectors"`
+	FindNodesCount            prometheus.Collector `group:"prometheus_collectors"`
+	GetPeersPeerCount         prometheus.Collector `group:"prometheus_collectors"`
+	GetPeersNodeCount         prometheus.Collector `group:"prometheus_collectors"`
+	GetPeersNodeTotal         prometheus.Collector `group:"prometheus_collectors"`
+	RequestMetaInfoTotal      prometheus.Collector `group:"prometheus_collectors"`
+	InfohashTriageTotal       prometheus.Collector `group:"prometheus_collectors"`
+	SampleInfohashesHashCount prometheus.Collector `group:"prometheus_collectors"`
+	SampleInfohashesHashTotal prometheus.Collector `group:"prometheus_collectors"`
+	SampleInfohashesNodeCount prometheus.Collector `group:"prometheus_collectors"`
+	SampleInfohashesNodeTotal prometheus.Collector `group:"prometheus_collectors"`
+	ScrapeNodeCount           prometheus.Collector `group:"prometheus_collectors"`
+	ScrapeNodeTotal           prometheus.Collector `group:"prometheus_collectors"`
 }
+
+const (
+	namespace = "bitmagnet"
+	subsystem = "dht_crawler"
+)
 
 func New(params Params) Result {
 	active := &concurrency.AtomicValue[bool]{}
@@ -52,11 +70,108 @@ func New(params Params) Result {
 	var c crawler
 
 	persistedTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "bitmagnet",
-		Subsystem: "dht_crawler",
+		Namespace: namespace,
+		Subsystem: subsystem,
 		Name:      "persisted_total",
 		Help:      "A counter of persisted database entities.",
 	}, []string{"entity"})
+
+	discoveredNodesTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "discovered_nodes_total",
+		Help:      "Total number of nodes the crawler discovers.",
+	}, []string{"result"})
+
+	findNodesCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "find_nodes_count",
+		Help:      "Number of nodes found by find_node requests.",
+		Buckets:   []float64{0, 1, 2, 3, 4, 5, 6, 7, 8},
+	})
+
+	getPeersPeerCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "get_peers_peer_count",
+		Help:      "Number of peers found by get_peers requests.",
+		Buckets:   []float64{0, 1, 2, 5, 10, 20, 50, 100},
+	})
+
+	getPeersNodeCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "get_peers_node_count",
+		Help:      "Number of nodes found by get_peers requests.",
+		Buckets:   []float64{0, 1, 2, 3, 4, 5, 6, 7, 8},
+	})
+
+	getPeersNodeTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "get_peers_node_total",
+		Help:      "Total number of nodes found by get_peers requests.",
+	}, []string{"result"})
+
+	requestMetaInfoTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "request_metainfo_total",
+		Help:      "Total number of metainfo requests.",
+	}, []string{"result"})
+
+	infohashTriageTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "infohash_triage_total",
+		Help:      "Total number of triaged infohashes.",
+	}, []string{"result"})
+
+	sampleInfohashesHashCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "sample_infohashes_hash_count",
+		Help:      "Number of infohashes found by sample_infohashes requests.",
+		Buckets:   []float64{0, 1, 2, 5, 10, 15, 20},
+	})
+
+	sampleInfohashesHashTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "sample_infohashes_hash_total",
+		Help:      "Total number of infohashes found by sample_infohashes requests.",
+	}, []string{"result"})
+
+	sampleInfohashesNodeCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "sample_infohashes_node_count",
+		Help:      "Number of nodes found by sample_infohashes requests.",
+		Buckets:   []float64{0, 1, 2, 3, 4, 5, 6, 7, 8},
+	})
+
+	sampleInfohashesNodeTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "sample_infohashes_node_total",
+		Help:      "Total number of nodes found by sample_infohashes requests.",
+	}, []string{"result"})
+
+	scrapeNodeCount := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "scrape_node_count",
+		Help:      "Number of nodes found by scrape requests.",
+		Buckets:   []float64{0, 1, 2, 3, 4, 5, 6, 7, 8},
+	})
+
+	scrapeNodeTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "scrape_node_total",
+		Help:      "Total number of nodes found by scrape requests.",
+	}, []string{"result"})
 
 	return Result{
 		Worker: worker.NewWorker(
@@ -126,14 +241,27 @@ func New(params Params) Result {
 						ignoreNodes: &ignoreFilter{
 							bloom: boom.NewStableBloomFilter(200_000*uint(scalingFactor), 2, 0.001),
 						},
-						blockingManager: blockingManager,
-						soughtNodeID:    &concurrency.AtomicValue[protocol.ID]{},
-						stopped:             make(chan struct{}),
-						persistedTotal:      persistedTotal,
-						dbSizeLimit:         params.Config.DBSizeLimit,
-						dbSizeCheckInterval: params.Config.DBSizeCheckInterval,
-						logger:              params.Logger.Named("dht_crawler"),
-						rand:                rand.NewCryptoSeededRand(),
+						blockingManager:           blockingManager,
+						soughtNodeID:              &concurrency.AtomicValue[protocol.ID]{},
+						stopped:                   make(chan struct{}),
+						persistedTotal:            persistedTotal,
+						discoveredNodesTotal:      discoveredNodesTotal,
+						findNodesCount:            findNodesCount,
+						getPeersPeerCount:         getPeersPeerCount,
+						getPeersNodeCount:         getPeersNodeCount,
+						getPeersNodeTotal:         getPeersNodeTotal,
+						requestMetaInfoTotal:      requestMetaInfoTotal,
+						infohashTriageTotal:       infohashTriageTotal,
+						sampleInfohashesHashCount: sampleInfohashesHashCount,
+						sampleInfohashesHashTotal: sampleInfohashesHashTotal,
+						sampleInfohashesNodeCount: sampleInfohashesNodeCount,
+						sampleInfohashesNodeTotal: sampleInfohashesNodeTotal,
+						scrapeNodeCount:           scrapeNodeCount,
+						scrapeNodeTotal:           scrapeNodeTotal,
+						dbSizeLimit:               params.Config.DBSizeLimit,
+						dbSizeCheckInterval:       params.Config.DBSizeCheckInterval,
+						logger:                    params.Logger.Named("dht_crawler"),
+						rand:                      rand.NewCryptoSeededRand(),
 					}
 					c.soughtNodeID.Set(protocol.RandomNodeID())
 
@@ -151,7 +279,20 @@ func New(params Params) Result {
 				},
 			},
 		),
-		PersistedTotal:   persistedTotal,
-		DhtCrawlerActive: active,
+		PersistedTotal:            persistedTotal,
+		DiscoveredNodesTotal:      discoveredNodesTotal,
+		FindNodesCount:            findNodesCount,
+		GetPeersPeerCount:         getPeersPeerCount,
+		GetPeersNodeCount:         getPeersNodeCount,
+		GetPeersNodeTotal:         getPeersNodeTotal,
+		RequestMetaInfoTotal:      requestMetaInfoTotal,
+		InfohashTriageTotal:       infohashTriageTotal,
+		SampleInfohashesHashCount: sampleInfohashesHashCount,
+		SampleInfohashesHashTotal: sampleInfohashesHashTotal,
+		SampleInfohashesNodeCount: sampleInfohashesNodeCount,
+		SampleInfohashesNodeTotal: sampleInfohashesNodeTotal,
+		ScrapeNodeCount:           scrapeNodeCount,
+		ScrapeNodeTotal:           scrapeNodeTotal,
+		DhtCrawlerActive:          active,
 	}
 }

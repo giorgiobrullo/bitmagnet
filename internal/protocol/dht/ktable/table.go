@@ -28,6 +28,8 @@ type TableQuery interface {
 	GetHashOrClosestNodes(id ID) GetHashOrClosestNodesResult
 	// SampleHashesAndNodes returns a random sample of up to 8 hashes and nodes, and the total hashes count.
 	SampleHashesAndNodes() SampleHashesAndNodesResult
+	// FilterKnownAddrs returns only the addresses not already known to this table.
+	FilterKnownAddrs(addrs []netip.Addr) []netip.Addr
 }
 
 type Table interface {
@@ -146,4 +148,17 @@ func (t *table) SampleHashesAndNodes() SampleHashesAndNodesResult {
 	defer t.mutex.RUnlock()
 
 	return SampleHashesAndNodes{}.execReturn(t)
+}
+
+func (t *table) FilterKnownAddrs(addrs []netip.Addr) []netip.Addr {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	unknown := make([]netip.Addr, 0, len(addrs))
+	for _, addr := range addrs {
+		if _, ok := t.addrs.addrs[addr.String()]; !ok {
+			unknown = append(unknown, addr)
+		}
+	}
+	return unknown
 }
