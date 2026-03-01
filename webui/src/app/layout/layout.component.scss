@@ -33,18 +33,11 @@
   }
   --mdc-text-button-label-text-size: 15px;
   nav {
-    position: absolute;
-    left: 340px;
-    top: 0;
-    height: 56px;
     display: flex;
     align-items: center;
+    margin-left: 20px;
     a {
       margin-right: 10px;
-    }
-    mat-icon[data-mat-icon-name="magnet"] {
-      transform: translateY(-2px);
-      overflow: visible;
     }
   }
 }
