@@ -132,8 +132,7 @@ export class DhtChartAdapterHashes
       0.2,
     );
     const labels: string[] = [];
-    const ipv4Data: number[] = [];
-    const ipv6Data: number[] = [];
+    const totalData: number[] = [];
 
     if (data) {
       for (const point of data) {
@@ -142,15 +141,12 @@ export class DhtChartAdapterHashes
             locale: resolveDateLocale(this.transloco.getActiveLang()),
           }),
         );
-        ipv4Data.push(point.hashesIPv4);
-        ipv6Data.push(point.hashesIPv6);
+        totalData.push(point.hashesIPv4 + point.hashesIPv6);
       }
     }
 
-    const ipv4Label = "IPv4";
-    const ipv6Label = "IPv6";
-    const ipv4Color = colors[createThemeColor("tertiary", 50)];
-    const ipv6Color = colors[createThemeColor("caution", 50)];
+    const totalLabel = "Hashes";
+    const totalColor = colors[createThemeColor("tertiary", 50)];
 
     return {
       type: "line",
@@ -181,9 +177,7 @@ export class DhtChartAdapterHashes
         },
         plugins: {
           legend: {
-            display: params.legend,
-            onClick: params.legendOnClick,
-            labels: { color: foreground },
+            display: false,
           },
         },
       },
@@ -191,19 +185,10 @@ export class DhtChartAdapterHashes
         labels,
         datasets: [
           {
-            label: ipv4Label,
-            data: ipv4Data,
-            hidden: params.hiddenDatasets.get(ipv4Label) ?? false,
-            borderColor: ipv4Color,
-            backgroundColor: withAlpha(ipv4Color, 0.08),
-            fill: true,
-          },
-          {
-            label: ipv6Label,
-            data: ipv6Data,
-            hidden: params.hiddenDatasets.get(ipv6Label) ?? false,
-            borderColor: ipv6Color,
-            backgroundColor: withAlpha(ipv6Color, 0.08),
+            label: totalLabel,
+            data: totalData,
+            borderColor: totalColor,
+            backgroundColor: withAlpha(totalColor, 0.08),
             fill: true,
           },
         ],
