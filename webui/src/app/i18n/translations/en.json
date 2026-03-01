@@ -68,7 +68,11 @@
       "active": "Active",
       "inactive": "Inactive",
       "total_nodes": "Total Nodes",
-      "total_hashes": "Total Hashes"
+      "total_hashes": "Total Hashes",
+      "nodes_over_time": "Nodes Over Time",
+      "hash_discovery": "Hash Discovery",
+      "composition": "Network Composition",
+      "auto_refresh": "Auto-refresh"
     },
     "event": {
       "created": "Created",
@@ -80,6 +84,7 @@
       "all": "All",
       "days": "Days",
       "days_1": "1 day",
+      "days_3": "3 days",
       "hours": "Hours",
       "hours_1": "1 hour",
       "hours_12": "12 hours",

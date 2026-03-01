@@ -6,24 +6,17 @@ import { ChartAdapter, FactoryParams } from "../../charting/types";
 import { createThemeColor } from "../../themes/theme-utils";
 import { ThemeInfoService } from "../../themes/theme-info.service";
 import { resolveDateLocale } from "../../dates/dates.locales";
-
-export type DhtDataPoint = {
-  timestamp: Date;
-  nodesCountIPv4: number;
-  nodesCountIPv6: number;
-  hashesCountIPv4: number;
-  hashesCountIPv6: number;
-};
+import { DhtMetricsSnapshot } from "./dht-metrics.controller";
 
 @Injectable({ providedIn: "root" })
 export class DhtChartAdapterNodes
-  implements ChartAdapter<DhtDataPoint[], "line">
+  implements ChartAdapter<DhtMetricsSnapshot[], "line">
 {
   private themeInfo = inject(ThemeInfoService);
   private transloco = inject(TranslocoService);
 
   create(
-    data: DhtDataPoint[] | undefined,
+    data: DhtMetricsSnapshot[] | undefined,
     params: FactoryParams,
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
@@ -37,32 +30,35 @@ export class DhtChartAdapterNodes
     if (data) {
       for (const point of data) {
         labels.push(
-          formatDate(point.timestamp, "H:mm:ss", {
+          formatDate(new Date(point.bucket), "d LLL H:mm", {
             locale: resolveDateLocale(this.transloco.getActiveLang()),
           }),
         );
-        ipv4Data.push(point.nodesCountIPv4);
-        ipv6Data.push(point.nodesCountIPv6);
+        ipv4Data.push(point.nodesIPv4);
+        ipv6Data.push(point.nodesIPv6);
       }
     }
+
+    const ipv4Label = "IPv4";
+    const ipv6Label = "IPv6";
 
     return {
       type: "line",
       options: {
-        animation: false,
+        animation: { duration: 400 },
         responsive: true,
         maintainAspectRatio: false,
         elements: {
           line: { tension: 0.3 },
-          point: { radius: 0 },
+          point: { radius: 0, hitRadius: 8, hoverRadius: 4 },
         },
         scales: {
           x: {
-            ticks: { color: foreground },
+            ticks: { color: foreground, maxTicksLimit: 12 },
             grid: { color: gridColor },
           },
           y: {
-            position: "left",
+            stacked: true,
             beginAtZero: false,
             ticks: {
               color: foreground,
@@ -80,28 +76,27 @@ export class DhtChartAdapterNodes
             onClick: params.legendOnClick,
             labels: { color: foreground },
           },
-          decimation: { enabled: true },
         },
       },
       data: {
         labels,
         datasets: [
           {
-            label: "IPv4 Nodes",
+            label: ipv4Label,
             data: ipv4Data,
-            hidden: params.hiddenDatasets.get("IPv4 Nodes") ?? false,
+            hidden: params.hiddenDatasets.get(ipv4Label) ?? false,
             borderColor: colors[createThemeColor("primary", 50)],
             backgroundColor: colors[createThemeColor("primary", 80)] + "33",
-            fill: true,
+            fill: "origin",
           },
           {
-            label: "IPv6 Nodes",
+            label: ipv6Label,
             data: ipv6Data,
-            hidden: params.hiddenDatasets.get("IPv6 Nodes") ?? false,
+            hidden: params.hiddenDatasets.get(ipv6Label) ?? false,
             borderColor: colors[createThemeColor("secondary", 50)],
             backgroundColor:
               colors[createThemeColor("secondary", 80)] + "33",
-            fill: true,
+            fill: "-1",
           },
         ],
       },
@@ -111,13 +106,13 @@ export class DhtChartAdapterNodes
 
 @Injectable({ providedIn: "root" })
 export class DhtChartAdapterHashes
-  implements ChartAdapter<DhtDataPoint[], "line">
+  implements ChartAdapter<DhtMetricsSnapshot[], "line">
 {
   private themeInfo = inject(ThemeInfoService);
   private transloco = inject(TranslocoService);
 
   create(
-    data: DhtDataPoint[] | undefined,
+    data: DhtMetricsSnapshot[] | undefined,
     params: FactoryParams,
   ): ChartConfiguration<"line"> {
     const { colors } = this.themeInfo.info;
@@ -131,32 +126,34 @@ export class DhtChartAdapterHashes
     if (data) {
       for (const point of data) {
         labels.push(
-          formatDate(point.timestamp, "H:mm:ss", {
+          formatDate(new Date(point.bucket), "d LLL H:mm", {
             locale: resolveDateLocale(this.transloco.getActiveLang()),
           }),
         );
-        ipv4Data.push(point.hashesCountIPv4);
-        ipv6Data.push(point.hashesCountIPv6);
+        ipv4Data.push(point.hashesIPv4);
+        ipv6Data.push(point.hashesIPv6);
       }
     }
+
+    const ipv4Label = "IPv4";
+    const ipv6Label = "IPv6";
 
     return {
       type: "line",
       options: {
-        animation: false,
+        animation: { duration: 400 },
         responsive: true,
         maintainAspectRatio: false,
         elements: {
           line: { tension: 0.3 },
-          point: { radius: 0 },
+          point: { radius: 0, hitRadius: 8, hoverRadius: 4 },
         },
         scales: {
           x: {
-            ticks: { color: foreground },
+            ticks: { color: foreground, maxTicksLimit: 12 },
             grid: { color: gridColor },
           },
           y: {
-            position: "left",
             beginAtZero: false,
             ticks: {
               color: foreground,
@@ -174,29 +171,73 @@ export class DhtChartAdapterHashes
             onClick: params.legendOnClick,
             labels: { color: foreground },
           },
-          decimation: { enabled: true },
         },
       },
       data: {
         labels,
         datasets: [
           {
-            label: "IPv4 Hashes",
+            label: ipv4Label,
             data: ipv4Data,
-            hidden: params.hiddenDatasets.get("IPv4 Hashes") ?? false,
+            hidden: params.hiddenDatasets.get(ipv4Label) ?? false,
             borderColor: colors[createThemeColor("tertiary", 50)],
             backgroundColor:
               colors[createThemeColor("tertiary", 80)] + "33",
             fill: true,
           },
           {
-            label: "IPv6 Hashes",
+            label: ipv6Label,
             data: ipv6Data,
-            hidden: params.hiddenDatasets.get("IPv6 Hashes") ?? false,
+            hidden: params.hiddenDatasets.get(ipv6Label) ?? false,
             borderColor: colors[createThemeColor("caution", 50)],
             backgroundColor:
               colors[createThemeColor("caution", 80)] + "33",
             fill: true,
+          },
+        ],
+      },
+    };
+  }
+}
+
+@Injectable({ providedIn: "root" })
+export class DhtChartAdapterComposition
+  implements ChartAdapter<{ ipv4: number; ipv6: number }, "doughnut">
+{
+  private themeInfo = inject(ThemeInfoService);
+
+  create(
+    data: { ipv4: number; ipv6: number } | undefined,
+    params: FactoryParams,
+  ): ChartConfiguration<"doughnut"> {
+    const { colors } = this.themeInfo.info;
+    const foreground = colors["foreground"];
+
+    return {
+      type: "doughnut",
+      options: {
+        animation: { animateRotate: true, duration: 600 },
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: "65%",
+        plugins: {
+          legend: {
+            display: params.legend,
+            position: "bottom",
+            labels: { color: foreground, boxWidth: 12 },
+          },
+        },
+      },
+      data: {
+        labels: ["IPv4", "IPv6"],
+        datasets: [
+          {
+            data: [data?.ipv4 ?? 0, data?.ipv6 ?? 0],
+            backgroundColor: [
+              colors[createThemeColor("primary", 50)],
+              colors[createThemeColor("secondary", 50)],
+            ],
+            borderWidth: 0,
           },
         ],
       },

@@ -12,3 +12,17 @@ query DhtStats {
     }
   }
 }
+
+query DhtMetrics($input: DhtMetricsInput!) {
+  dht {
+    metrics(input: $input) {
+      snapshots {
+        bucket
+        nodesIPv4
+        nodesIPv6
+        hashesIPv4
+        hashesIPv6
+      }
+    }
+  }
+}

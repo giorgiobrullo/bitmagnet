@@ -7,24 +7,39 @@
         <mat-card-content>
           <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv4 + dhtStats.result.nodesCountIPv6 | number }}</div>
           <div class="dht-stat-label">{{ t("dashboard.dht.total_nodes") }}</div>
+          <app-sparkline [data]="sparkTotalNodes" />
         </mat-card-content>
       </mat-card>
       <mat-card class="dht-stat-card">
         <mat-card-content>
           <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv4 | number }}</div>
           <div class="dht-stat-label">{{ t("dashboard.dht.nodes_ipv4") }}</div>
+          <app-sparkline [data]="sparkIPv4Nodes" />
         </mat-card-content>
       </mat-card>
       <mat-card class="dht-stat-card">
         <mat-card-content>
           <div class="dht-stat-number">{{ dhtStats.result.nodesCountIPv6 | number }}</div>
           <div class="dht-stat-label">{{ t("dashboard.dht.nodes_ipv6") }}</div>
+          <app-sparkline [data]="sparkIPv6Nodes" />
         </mat-card-content>
       </mat-card>
       <mat-card class="dht-stat-card">
         <mat-card-content>
           <div class="dht-stat-number">{{ dhtStats.result.hashesCountIPv4 + dhtStats.result.hashesCountIPv6 | number }}</div>
           <div class="dht-stat-label">{{ t("dashboard.dht.total_hashes") }}</div>
+          <app-sparkline [data]="sparkTotalHashes" />
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="dht-stat-card dht-composition-card">
+        <mat-card-content>
+          <app-chart
+            [title]="''"
+            [$data]="composition$"
+            [adapter]="compositionAdapter"
+            [height]="120"
+            [width]="120"
+          />
         </mat-card-content>
       </mat-card>
       <mat-card class="dht-stat-card">
@@ -41,24 +56,54 @@
           <div class="dht-stat-label">{{ t("dashboard.dht.server_uptime") }}</div>
         </mat-card-content>
       </mat-card>
-      <mat-card class="dht-stat-card">
-        <mat-card-content>
-          <div class="dht-stat-number dht-stat-number-sm">{{ lastSuccess || "—" }}</div>
-          <div class="dht-stat-label">{{ t("dashboard.dht.last_success") }}</div>
-        </mat-card-content>
-      </mat-card>
+    </div>
+
+    <!-- Timeframe controls -->
+    <div class="dht-controls">
+      <mat-button-toggle-group
+        [value]="metricsController.params.timeframe"
+        (change)="metricsController.setTimeframe($event.value)"
+      >
+        @for (name of timeframeNames; track name) {
+          <mat-button-toggle [value]="name">
+            {{ t("dashboard.interval." + name) }}
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+
+      <div class="dht-controls-right">
+        <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
+          <mat-select
+            [value]="metricsController.params.autoRefresh"
+            (valueChange)="metricsController.setAutoRefreshInterval($event)"
+          >
+            @for (name of autoRefreshIntervalNames; track name) {
+              <mat-option [value]="name">
+                {{ t("dashboard.interval." + name) }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-icon-button
+          (click)="metricsController.refresh()"
+          matTooltip="Refresh"
+        >
+          <mat-icon>sync</mat-icon>
+        </button>
+      </div>
     </div>
 
     <!-- Charts -->
     <div class="dht-charts">
       <app-chart
-        [title]="t('dashboard.dht.nodes')"
-        [$data]="dataPoints$"
+        [title]="t('dashboard.dht.nodes_over_time')"
+        [$data]="snapshots$"
         [adapter]="nodesChartAdapter"
       />
       <app-chart
-        [title]="t('dashboard.dht.hashes')"
-        [$data]="dataPoints$"
+        [title]="t('dashboard.dht.hash_discovery')"
+        [$data]="snapshots$"
         [adapter]="hashesChartAdapter"
       />
     </div>

@@ -27,6 +27,24 @@ type ContentTypeFacetInput struct {
 	Filter    graphql.Omittable[[]*model.ContentType] `json:"filter,omitempty"`
 }
 
+type DhtMetricsInput struct {
+	BucketDuration MetricsBucketDuration         `json:"bucketDuration"`
+	StartTime      graphql.Omittable[*time.Time] `json:"startTime,omitempty"`
+	EndTime        graphql.Omittable[*time.Time] `json:"endTime,omitempty"`
+}
+
+type DhtMetricsResult struct {
+	Snapshots []DhtSnapshot `json:"snapshots"`
+}
+
+type DhtSnapshot struct {
+	Bucket     time.Time `json:"bucket"`
+	NodesIPv4  int       `json:"nodesIPv4"`
+	NodesIPv6  int       `json:"nodesIPv6"`
+	HashesIPv4 int       `json:"hashesIPv4"`
+	HashesIPv6 int       `json:"hashesIPv6"`
+}
+
 type DhtStats struct {
 	NodesCountIPv4     int        `json:"nodesCountIPv4"`
 	NodesCountIPv6     int        `json:"nodesCountIPv6"`

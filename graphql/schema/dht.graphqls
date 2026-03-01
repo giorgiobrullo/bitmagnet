@@ -9,6 +9,25 @@ type DhtStats {
   crawlerActive: Boolean!
 }
 
+type DhtSnapshot {
+  bucket: DateTime!
+  nodesIPv4: Int!
+  nodesIPv6: Int!
+  hashesIPv4: Int!
+  hashesIPv6: Int!
+}
+
+type DhtMetricsResult {
+  snapshots: [DhtSnapshot!]!
+}
+
+input DhtMetricsInput {
+  bucketDuration: MetricsBucketDuration!
+  startTime: DateTime
+  endTime: DateTime
+}
+
 type DhtQuery {
   stats: DhtStats!
+  metrics(input: DhtMetricsInput!): DhtMetricsResult!
 }

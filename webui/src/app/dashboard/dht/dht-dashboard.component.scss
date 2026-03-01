@@ -6,7 +6,7 @@
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .dht-stat-card {
@@ -14,7 +14,25 @@
   border-top: 2px solid var(--dht-accent, transparent);
 
   mat-card-content {
-    padding: 14px 12px;
+    padding: 14px 12px 8px;
+  }
+
+  app-sparkline {
+    margin-top: 8px;
+    opacity: 0.6;
+  }
+}
+
+.dht-composition-card {
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+
+  app-chart {
+    max-width: 140px;
   }
 }
 
@@ -45,8 +63,31 @@
   opacity: 0.4;
 }
 
+.dht-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  mat-button-toggle-group {
+    --mat-standard-button-toggle-height: 32px;
+  }
+}
+
+.dht-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dht-refresh-select {
+  width: 120px;
+  --mat-form-field-container-height: 32px;
+}
+
 .dht-charts {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 }

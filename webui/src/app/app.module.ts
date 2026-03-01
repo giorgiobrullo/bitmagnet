@@ -4,6 +4,7 @@ import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule } from "@angular/forms";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatButtonModule } from "@angular/material/button";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatCardModule } from "@angular/material/card";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -34,6 +35,7 @@ import { GraphQLModule } from "./graphql/graphql.module";
     GraphQLModule,
     MatAutocompleteModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
     MatChipsModule,

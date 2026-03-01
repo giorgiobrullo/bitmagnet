@@ -111,8 +111,21 @@ type ComplexityRoot struct {
 		Value      func(childComplexity int) int
 	}
 
+	DhtMetricsResult struct {
+		Snapshots func(childComplexity int) int
+	}
+
 	DhtQuery struct {
-		Stats func(childComplexity int) int
+		Metrics func(childComplexity int, input gen.DhtMetricsInput) int
+		Stats   func(childComplexity int) int
+	}
+
+	DhtSnapshot struct {
+		Bucket     func(childComplexity int) int
+		HashesIPv4 func(childComplexity int) int
+		HashesIPv6 func(childComplexity int) int
+		NodesIPv4  func(childComplexity int) int
+		NodesIPv6  func(childComplexity int) int
 	}
 
 	DhtStats struct {
@@ -769,12 +782,66 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ContentTypeAgg.Value(childComplexity), true
 
+	case "DhtMetricsResult.snapshots":
+		if e.complexity.DhtMetricsResult.Snapshots == nil {
+			break
+		}
+
+		return e.complexity.DhtMetricsResult.Snapshots(childComplexity), true
+
+	case "DhtQuery.metrics":
+		if e.complexity.DhtQuery.Metrics == nil {
+			break
+		}
+
+		args, err := ec.field_DhtQuery_metrics_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.DhtQuery.Metrics(childComplexity, args["input"].(gen.DhtMetricsInput)), true
+
 	case "DhtQuery.stats":
 		if e.complexity.DhtQuery.Stats == nil {
 			break
 		}
 
 		return e.complexity.DhtQuery.Stats(childComplexity), true
+
+	case "DhtSnapshot.bucket":
+		if e.complexity.DhtSnapshot.Bucket == nil {
+			break
+		}
+
+		return e.complexity.DhtSnapshot.Bucket(childComplexity), true
+
+	case "DhtSnapshot.hashesIPv4":
+		if e.complexity.DhtSnapshot.HashesIPv4 == nil {
+			break
+		}
+
+		return e.complexity.DhtSnapshot.HashesIPv4(childComplexity), true
+
+	case "DhtSnapshot.hashesIPv6":
+		if e.complexity.DhtSnapshot.HashesIPv6 == nil {
+			break
+		}
+
+		return e.complexity.DhtSnapshot.HashesIPv6(childComplexity), true
+
+	case "DhtSnapshot.nodesIPv4":
+		if e.complexity.DhtSnapshot.NodesIPv4 == nil {
+			break
+		}
+
+		return e.complexity.DhtSnapshot.NodesIPv4(childComplexity), true
+
+	case "DhtSnapshot.nodesIPv6":
+		if e.complexity.DhtSnapshot.NodesIPv6 == nil {
+			break
+		}
+
+		return e.complexity.DhtSnapshot.NodesIPv6(childComplexity), true
 
 	case "DhtStats.crawlerActive":
 		if e.complexity.DhtStats.CrawlerActive == nil {
@@ -2215,6 +2282,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputContentTypeFacetInput,
+		ec.unmarshalInputDhtMetricsInput,
 		ec.unmarshalInputGenreFacetInput,
 		ec.unmarshalInputLanguageFacetInput,
 		ec.unmarshalInputQueueEnqueueReprocessTorrentsBatchInput,
@@ -2348,8 +2416,27 @@ var sources = []*ast.Source{
   crawlerActive: Boolean!
 }
 
+type DhtSnapshot {
+  bucket: DateTime!
+  nodesIPv4: Int!
+  nodesIPv6: Int!
+  hashesIPv4: Int!
+  hashesIPv6: Int!
+}
+
+type DhtMetricsResult {
+  snapshots: [DhtSnapshot!]!
+}
+
+input DhtMetricsInput {
+  bucketDuration: MetricsBucketDuration!
+  startTime: DateTime
+  endTime: DateTime
+}
+
 type DhtQuery {
   stats: DhtStats!
+  metrics(input: DhtMetricsInput!): DhtMetricsResult!
 }
 `, BuiltIn: false},
 	{Name: "../../graphql/schema/enums.graphqls", Input: `enum ContentType {
@@ -3118,6 +3205,34 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_DhtQuery_metrics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_DhtQuery_metrics_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_DhtQuery_metrics_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (gen.DhtMetricsInput, error) {
+	if _, ok := rawArgs["input"]; !ok {
+		var zeroVal gen.DhtMetricsInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNDhtMetricsInput2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtMetricsInput(ctx, tmp)
+	}
+
+	var zeroVal gen.DhtMetricsInput
+	return zeroVal, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -5355,6 +5470,62 @@ func (ec *executionContext) fieldContext_ContentTypeAgg_isEstimate(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _DhtMetricsResult_snapshots(ctx context.Context, field graphql.CollectedField, obj *gen.DhtMetricsResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtMetricsResult_snapshots(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Snapshots, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]gen.DhtSnapshot)
+	fc.Result = res
+	return ec.marshalNDhtSnapshot2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtSnapshotᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtMetricsResult_snapshots(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtMetricsResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "bucket":
+				return ec.fieldContext_DhtSnapshot_bucket(ctx, field)
+			case "nodesIPv4":
+				return ec.fieldContext_DhtSnapshot_nodesIPv4(ctx, field)
+			case "nodesIPv6":
+				return ec.fieldContext_DhtSnapshot_nodesIPv6(ctx, field)
+			case "hashesIPv4":
+				return ec.fieldContext_DhtSnapshot_hashesIPv4(ctx, field)
+			case "hashesIPv6":
+				return ec.fieldContext_DhtSnapshot_hashesIPv6(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DhtSnapshot", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _DhtQuery_stats(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.DhtQuery) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DhtQuery_stats(ctx, field)
 	if err != nil {
@@ -5412,6 +5583,285 @@ func (ec *executionContext) fieldContext_DhtQuery_stats(_ context.Context, field
 				return ec.fieldContext_DhtStats_crawlerActive(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DhtStats", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtQuery_metrics(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.DhtQuery) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtQuery_metrics(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Metrics(ctx, fc.Args["input"].(gen.DhtMetricsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(gen.DhtMetricsResult)
+	fc.Result = res
+	return ec.marshalNDhtMetricsResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtMetricsResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtQuery_metrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtQuery",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "snapshots":
+				return ec.fieldContext_DhtMetricsResult_snapshots(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DhtMetricsResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_DhtQuery_metrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtSnapshot_bucket(ctx context.Context, field graphql.CollectedField, obj *gen.DhtSnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtSnapshot_bucket(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bucket, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtSnapshot_bucket(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtSnapshot_nodesIPv4(ctx context.Context, field graphql.CollectedField, obj *gen.DhtSnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtSnapshot_nodesIPv4(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NodesIPv4, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtSnapshot_nodesIPv4(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtSnapshot_nodesIPv6(ctx context.Context, field graphql.CollectedField, obj *gen.DhtSnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtSnapshot_nodesIPv6(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NodesIPv6, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtSnapshot_nodesIPv6(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtSnapshot_hashesIPv4(ctx context.Context, field graphql.CollectedField, obj *gen.DhtSnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtSnapshot_hashesIPv4(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HashesIPv4, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtSnapshot_hashesIPv4(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DhtSnapshot_hashesIPv6(ctx context.Context, field graphql.CollectedField, obj *gen.DhtSnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DhtSnapshot_hashesIPv6(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HashesIPv6, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DhtSnapshot_hashesIPv6(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DhtSnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7036,6 +7486,8 @@ func (ec *executionContext) fieldContext_Query_dht(_ context.Context, field grap
 			switch field.Name {
 			case "stats":
 				return ec.fieldContext_DhtQuery_stats(ctx, field)
+			case "metrics":
+				return ec.fieldContext_DhtQuery_metrics(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type DhtQuery", field.Name)
 		},
@@ -16583,6 +17035,47 @@ func (ec *executionContext) unmarshalInputContentTypeFacetInput(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDhtMetricsInput(ctx context.Context, obj any) (gen.DhtMetricsInput, error) {
+	var it gen.DhtMetricsInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"bucketDuration", "startTime", "endTime"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "bucketDuration":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bucketDuration"))
+			data, err := ec.unmarshalNMetricsBucketDuration2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐMetricsBucketDuration(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BucketDuration = data
+		case "startTime":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startTime"))
+			data, err := ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.StartTime = graphql.OmittableOf(data)
+		case "endTime":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endTime"))
+			data, err := ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EndTime = graphql.OmittableOf(data)
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGenreFacetInput(ctx context.Context, obj any) (gen.GenreFacetInput, error) {
 	var it gen.GenreFacetInput
 	asMap := map[string]any{}
@@ -18112,6 +18605,45 @@ func (ec *executionContext) _ContentTypeAgg(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var dhtMetricsResultImplementors = []string{"DhtMetricsResult"}
+
+func (ec *executionContext) _DhtMetricsResult(ctx context.Context, sel ast.SelectionSet, obj *gen.DhtMetricsResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dhtMetricsResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DhtMetricsResult")
+		case "snapshots":
+			out.Values[i] = ec._DhtMetricsResult_snapshots(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var dhtQueryImplementors = []string{"DhtQuery"}
 
 func (ec *executionContext) _DhtQuery(ctx context.Context, sel ast.SelectionSet, obj *gqlmodel.DhtQuery) graphql.Marshaler {
@@ -18125,6 +18657,101 @@ func (ec *executionContext) _DhtQuery(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("DhtQuery")
 		case "stats":
 			out.Values[i] = ec._DhtQuery_stats(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "metrics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DhtQuery_metrics(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var dhtSnapshotImplementors = []string{"DhtSnapshot"}
+
+func (ec *executionContext) _DhtSnapshot(ctx context.Context, sel ast.SelectionSet, obj *gen.DhtSnapshot) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dhtSnapshotImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DhtSnapshot")
+		case "bucket":
+			out.Values[i] = ec._DhtSnapshot_bucket(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nodesIPv4":
+			out.Values[i] = ec._DhtSnapshot_nodesIPv4(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nodesIPv6":
+			out.Values[i] = ec._DhtSnapshot_nodesIPv6(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hashesIPv4":
+			out.Values[i] = ec._DhtSnapshot_hashesIPv4(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hashesIPv6":
+			out.Values[i] = ec._DhtSnapshot_hashesIPv6(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21662,8 +22289,65 @@ func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, se
 	return res
 }
 
+func (ec *executionContext) unmarshalNDhtMetricsInput2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtMetricsInput(ctx context.Context, v any) (gen.DhtMetricsInput, error) {
+	res, err := ec.unmarshalInputDhtMetricsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDhtMetricsResult2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtMetricsResult(ctx context.Context, sel ast.SelectionSet, v gen.DhtMetricsResult) graphql.Marshaler {
+	return ec._DhtMetricsResult(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNDhtQuery2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚐDhtQuery(ctx context.Context, sel ast.SelectionSet, v gqlmodel.DhtQuery) graphql.Marshaler {
 	return ec._DhtQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDhtSnapshot2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtSnapshot(ctx context.Context, sel ast.SelectionSet, v gen.DhtSnapshot) graphql.Marshaler {
+	return ec._DhtSnapshot(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDhtSnapshot2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtSnapshotᚄ(ctx context.Context, sel ast.SelectionSet, v []gen.DhtSnapshot) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDhtSnapshot2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtSnapshot(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNDhtStats2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐDhtStats(ctx context.Context, sel ast.SelectionSet, v gen.DhtStats) graphql.Marshaler {

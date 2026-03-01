@@ -95,9 +95,35 @@ export type ContentTypeFacetInput = {
   filter?: InputMaybe<Array<InputMaybe<ContentType>>>;
 };
 
+export type DhtMetricsInput = {
+  bucketDuration: MetricsBucketDuration;
+  endTime?: InputMaybe<Scalars['DateTime']['input']>;
+  startTime?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type DhtMetricsResult = {
+  __typename?: 'DhtMetricsResult';
+  snapshots: Array<DhtSnapshot>;
+};
+
 export type DhtQuery = {
   __typename?: 'DhtQuery';
+  metrics: DhtMetricsResult;
   stats: DhtStats;
+};
+
+
+export type DhtQueryMetricsArgs = {
+  input: DhtMetricsInput;
+};
+
+export type DhtSnapshot = {
+  __typename?: 'DhtSnapshot';
+  bucket: Scalars['DateTime']['output'];
+  hashesIPv4: Scalars['Int']['output'];
+  hashesIPv6: Scalars['Int']['output'];
+  nodesIPv4: Scalars['Int']['output'];
+  nodesIPv6: Scalars['Int']['output'];
 };
 
 export type DhtStats = {
@@ -963,6 +989,13 @@ export type DhtStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DhtStatsQuery = { __typename?: 'Query', dht: { __typename?: 'DhtQuery', stats: { __typename?: 'DhtStats', nodesCountIPv4: number, nodesCountIPv6: number, hashesCountIPv4: number, hashesCountIPv6: number, serverStartTime?: string | null, serverLastSuccess?: string | null, serverLastResponse?: string | null, crawlerActive: boolean } } };
 
+export type DhtMetricsQueryVariables = Exact<{
+  input: DhtMetricsInput;
+}>;
+
+
+export type DhtMetricsQuery = { __typename?: 'Query', dht: { __typename?: 'DhtQuery', metrics: { __typename?: 'DhtMetricsResult', snapshots: Array<{ __typename?: 'DhtSnapshot', bucket: string, nodesIPv4: number, nodesIPv6: number, hashesIPv4: number, hashesIPv6: number }> } } };
+
 export type HealthCheckQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1399,6 +1432,32 @@ export const DhtStatsDocument = gql`
   })
   export class DhtStatsGQL extends Apollo.Query<DhtStatsQuery, DhtStatsQueryVariables> {
     override document = DhtStatsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const DhtMetricsDocument = gql`
+    query DhtMetrics($input: DhtMetricsInput!) {
+  dht {
+    metrics(input: $input) {
+      snapshots {
+        bucket
+        nodesIPv4
+        nodesIPv6
+        hashesIPv4
+        hashesIPv6
+      }
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DhtMetricsGQL extends Apollo.Query<DhtMetricsQuery, DhtMetricsQueryVariables> {
+    override document = DhtMetricsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
