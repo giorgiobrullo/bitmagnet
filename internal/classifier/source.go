@@ -1,12 +1,14 @@
 package classifier
 
 type Source struct {
-	Schema          string          `json:"$schema,omitempty" yaml:"$schema,omitempty"`
-	Workflows       workflowSources `json:"workflows"`
-	FlagDefinitions flagDefinitions `json:"flag_definitions"`
-	Flags           Flags           `json:"flags"`
-	Keywords        keywordGroups   `json:"keywords"`
-	Extensions      extensionGroups `json:"extensions"`
+	Schema            string          `json:"$schema,omitempty" yaml:"$schema,omitempty"`
+	Workflows         workflowSources `json:"workflows"`
+	FlagDefinitions   flagDefinitions `json:"flag_definitions"`
+	Flags             Flags           `json:"flags"`
+	Keywords          keywordGroups   `json:"keywords"`
+	KeywordsOverride  keywordGroups   `json:"keywords_override"`
+	Extensions        extensionGroups `json:"extensions"`
+	ExtensionsOverride extensionGroups `json:"extensions_override"`
 }
 
 func (s Source) merge(other Source) (Source, error) {
@@ -18,8 +20,8 @@ func (s Source) merge(other Source) (Source, error) {
 	return Source{
 		FlagDefinitions: flagDefs,
 		Flags:           s.Flags.merge(other.Flags),
-		Keywords:        s.Keywords.merge(other.Keywords),
-		Extensions:      s.Extensions.merge(other.Extensions),
+		Keywords:        s.Keywords.merge(other.Keywords).applyOverrides(other.KeywordsOverride),
+		Extensions:      s.Extensions.merge(other.Extensions).applyOverrides(other.ExtensionsOverride),
 		Workflows:       s.Workflows.merge(other.Workflows),
 	}, nil
 }
@@ -55,6 +57,29 @@ func (g keywordGroups) merge(other keywordGroups) keywordGroups {
 	return result
 }
 
+func (g keywordGroups) applyOverrides(overrides keywordGroups) keywordGroups {
+	if len(overrides) == 0 {
+		return g
+	}
+
+	result := make(keywordGroups)
+	for k, v := range g {
+		if ov, ok := overrides[k]; ok {
+			result[k] = ov
+		} else {
+			result[k] = v
+		}
+	}
+
+	for k, v := range overrides {
+		if _, ok := result[k]; !ok {
+			result[k] = v
+		}
+	}
+
+	return result
+}
+
 type extensionGroups map[string][]string
 
 func (g extensionGroups) merge(other extensionGroups) extensionGroups {
@@ -69,6 +94,29 @@ func (g extensionGroups) merge(other extensionGroups) extensionGroups {
 	}
 
 	for k, v := range other {
+		if _, ok := result[k]; !ok {
+			result[k] = v
+		}
+	}
+
+	return result
+}
+
+func (g extensionGroups) applyOverrides(overrides extensionGroups) extensionGroups {
+	if len(overrides) == 0 {
+		return g
+	}
+
+	result := make(extensionGroups)
+	for k, v := range g {
+		if ov, ok := overrides[k]; ok {
+			result[k] = ov
+		} else {
+			result[k] = v
+		}
+	}
+
+	for k, v := range overrides {
 		if _, ok := result[k]; !ok {
 			result[k] = v
 		}

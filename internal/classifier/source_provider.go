@@ -136,8 +136,10 @@ func (c configSourceProvider) source() (Source, error) {
 	}
 
 	return Source{
-		Keywords:   c.config.Keywords,
-		Extensions: c.config.Extensions,
-		Flags:      fs,
+		Keywords:           c.config.Keywords,
+		KeywordsOverride:   c.config.KeywordsOverride,
+		Extensions:         c.config.Extensions,
+		ExtensionsOverride: c.config.ExtensionsOverride,
+		Flags:              fs,
 	}, nil
 }
