@@ -206,11 +206,16 @@ func isWeight(r rune) bool {
 	return r == 'A' || r == 'B' || r == 'C' || r == 'D'
 }
 
+// maxTsvectorPositions caps the total number of position entries to stay within PostgreSQL's tsvector limits.
+const maxTsvectorPositions = 50_000
+
 func (v Tsvector) AddText(text string, weight TsvectorWeight) {
 	nextPos := 1
+	totalPositions := 0
 
 	for _, pls := range v {
 		for pos := range pls {
+			totalPositions++
 			if pos >= nextPos {
 				nextPos = pos + 1
 			}
@@ -222,12 +227,17 @@ func (v Tsvector) AddText(text string, weight TsvectorWeight) {
 	}
 
 	for _, lexeme := range TokenizeFlat(text) {
+		if totalPositions >= maxTsvectorPositions {
+			break
+		}
+
 		if _, ok := v[lexeme]; !ok {
 			v[lexeme] = make(map[int]TsvectorWeight)
 		}
 
 		v[lexeme][nextPos] = weight
 		nextPos++
+		totalPositions++
 	}
 }
 
