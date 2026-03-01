@@ -12,7 +12,8 @@ type Config struct {
 
 func NewDefaultConfig() Config {
 	return Config{
-		Port:         3334,
-		QueryTimeout: time.Second * 4,
+		Port:          3334,
+		QueryTimeout:  time.Second * 4,
+		ListenAddress: []string{"0.0.0.0", "::"},
 	}
 }

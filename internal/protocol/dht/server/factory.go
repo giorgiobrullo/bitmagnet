@@ -61,19 +61,18 @@ func New(p Params) Result {
 				logger:           logger,
 			}
 		}
-		var internalServer Server
-		if len(p.Config.ListenAddress) == 0 {
-			// Keep the existing behavior of IPv4 only.
-			internalServer = newBaseServer(netip.IPv4Unspecified())
-		} else {
-			servers := make([]*server, 0, len(p.Config.ListenAddress))
-			for _, addr := range p.Config.ListenAddress {
-				parsedAddr, err := netip.ParseAddr(addr)
-				if err != nil {
-					return nil, fmt.Errorf("could not parse listen address %s: %w", addr, err)
-				}
-				servers = append(servers, newBaseServer(parsedAddr))
+		servers := make([]*server, 0, len(p.Config.ListenAddress))
+		for _, addr := range p.Config.ListenAddress {
+			parsedAddr, err := netip.ParseAddr(addr)
+			if err != nil {
+				return nil, fmt.Errorf("could not parse listen address %s: %w", addr, err)
 			}
+			servers = append(servers, newBaseServer(parsedAddr))
+		}
+		var internalServer Server
+		if len(servers) == 1 {
+			internalServer = servers[0]
+		} else {
 			internalServer = &MultiplexServer{
 				servers: servers,
 			}
