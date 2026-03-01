@@ -275,8 +275,10 @@ type ComplexityRoot struct {
 		FilesStatus  func(childComplexity int) int
 		HasFilesInfo func(childComplexity int) int
 		InfoHash     func(childComplexity int) int
+		InfoHashV2   func(childComplexity int) int
 		Leechers     func(childComplexity int) int
 		MagnetURI    func(childComplexity int) int
+		MetaVersion  func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Seeders      func(childComplexity int) int
 		SingleFile   func(childComplexity int) int
@@ -470,6 +472,8 @@ type QueueQueryResolver interface {
 	Jobs(ctx context.Context, obj *gqlmodel.QueueQuery, input gqlmodel.QueueJobsQueryInput) (gqlmodel.QueueJobsQueryResult, error)
 }
 type TorrentResolver interface {
+	MetaVersion(ctx context.Context, obj *model.Torrent) (int, error)
+
 	Sources(ctx context.Context, obj *model.Torrent) ([]gqlmodel.TorrentSourceInfo, error)
 }
 type TorrentMutationResolver interface {
@@ -1422,6 +1426,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Torrent.InfoHash(childComplexity), true
 
+	case "Torrent.infoHashV2":
+		if e.complexity.Torrent.InfoHashV2 == nil {
+			break
+		}
+
+		return e.complexity.Torrent.InfoHashV2(childComplexity), true
+
 	case "Torrent.leechers":
 		if e.complexity.Torrent.Leechers == nil {
 			break
@@ -1435,6 +1446,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Torrent.MagnetURI(childComplexity), true
+
+	case "Torrent.metaVersion":
+		if e.complexity.Torrent.MetaVersion == nil {
+			break
+		}
+
+		return e.complexity.Torrent.MetaVersion(childComplexity), true
 
 	case "Torrent.name":
 		if e.complexity.Torrent.Name == nil {
@@ -2554,6 +2572,8 @@ input TorrentMetricsQueryInput {
 `, BuiltIn: false},
 	{Name: "../../graphql/schema/models.graphqls", Input: `type Torrent {
   infoHash: Hash20!
+  infoHashV2: Hash32
+  metaVersion: Int!
   name: String!
   size: Int!
   hasFilesInfo: Boolean!
@@ -2887,6 +2907,7 @@ input QueuePurgeJobsInput {
 }
 `, BuiltIn: false},
 	{Name: "../../graphql/schema/scalars.graphqls", Input: `scalar Hash20
+scalar Hash32
 scalar Date
 scalar DateTime
 scalar Duration
@@ -9282,6 +9303,91 @@ func (ec *executionContext) fieldContext_Torrent_infoHash(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Torrent_infoHashV2(ctx context.Context, field graphql.CollectedField, obj *model.Torrent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Torrent_infoHashV2(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InfoHashV2, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*protocol.IDv2)
+	fc.Result = res
+	return ec.marshalOHash322ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋprotocolᚐIDv2(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Torrent_infoHashV2(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Torrent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Hash32 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Torrent_metaVersion(ctx context.Context, field graphql.CollectedField, obj *model.Torrent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Torrent_metaVersion(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Torrent().MetaVersion(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Torrent_metaVersion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Torrent",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Torrent_name(ctx context.Context, field graphql.CollectedField, obj *model.Torrent) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Torrent_name(ctx, field)
 	if err != nil {
@@ -10165,6 +10271,10 @@ func (ec *executionContext) fieldContext_TorrentContent_torrent(_ context.Contex
 			switch field.Name {
 			case "infoHash":
 				return ec.fieldContext_Torrent_infoHash(ctx, field)
+			case "infoHashV2":
+				return ec.fieldContext_Torrent_infoHashV2(ctx, field)
+			case "metaVersion":
+				return ec.fieldContext_Torrent_metaVersion(ctx, field)
 			case "name":
 				return ec.fieldContext_Torrent_name(ctx, field)
 			case "size":
@@ -19501,6 +19611,44 @@ func (ec *executionContext) _Torrent(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "infoHashV2":
+			out.Values[i] = ec._Torrent_infoHashV2(ctx, field, obj)
+		case "metaVersion":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Torrent_metaVersion(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "name":
 			out.Values[i] = ec._Torrent_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -23292,6 +23440,22 @@ func (ec *executionContext) marshalOHash202ᚕgithubᚗcomᚋbitmagnetᚑioᚋbi
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOHash322ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋprotocolᚐIDv2(ctx context.Context, v any) (*protocol.IDv2, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(protocol.IDv2)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOHash322ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋprotocolᚐIDv2(ctx context.Context, sel ast.SelectionSet, v *protocol.IDv2) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOInt2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐNullUint(ctx context.Context, v any) (model.NullUint, error) {

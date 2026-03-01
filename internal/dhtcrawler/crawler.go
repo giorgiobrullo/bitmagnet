@@ -110,7 +110,9 @@ type nodeHasPeersForHash struct {
 
 type infoHashWithMetaInfo struct {
 	nodeHasPeersForHash
-	metaInfo metainfo.Info
+	metaInfo    metainfo.Info
+	metaVersion int16
+	v2Hash      *protocol.IDv2
 }
 
 type infoHashWithPeers struct {

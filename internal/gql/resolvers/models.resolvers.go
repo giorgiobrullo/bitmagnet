@@ -22,6 +22,11 @@ func (r *contentResolver) OriginalLanguage(ctx context.Context, obj *model.Conte
 	return language, nil
 }
 
+// MetaVersion is the resolver for the metaVersion field.
+func (r *torrentResolver) MetaVersion(ctx context.Context, obj *model.Torrent) (int, error) {
+	return int(obj.MetaVersion), nil
+}
+
 // Sources is the resolver for the sources field.
 func (r *torrentResolver) Sources(ctx context.Context, obj *model.Torrent) ([]gqlmodel.TorrentSourceInfo, error) {
 	return gqlmodel.TorrentSourceInfosFromTorrent(*obj), nil

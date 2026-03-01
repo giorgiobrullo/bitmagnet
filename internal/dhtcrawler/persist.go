@@ -66,7 +66,7 @@ func (c *crawler) runPersistTorrents(ctx context.Context) {
 				hashMap[i.infoHash] = i
 
 				if t, err := createTorrentModel(
-					i.infoHash, i.metaInfo, c.savePieces, c.saveFilesThreshold); err != nil {
+					i.infoHash, i.metaInfo, c.savePieces, c.saveFilesThreshold, i.metaVersion, i.v2Hash); err != nil {
 					c.logger.Errorf("error creating torrent model: %s", err.Error())
 				} else {
 					for _, f := range t.Files {
@@ -106,6 +106,8 @@ func (c *crawler) runPersistTorrents(ctx context.Context) {
 						string(c.dao.Torrent.FilesStatus.ColumnName()),
 						string(c.dao.Torrent.FilesCount.ColumnName()),
 						string(c.dao.Torrent.UpdatedAt.ColumnName()),
+						"info_hash_v2",
+						"meta_version",
 					}),
 				}).CreateInBatches(torrentsToPersist, 100); err != nil {
 					return err
@@ -154,6 +156,8 @@ func createTorrentModel(
 	info metainfo.Info,
 	savePieces bool,
 	saveFilesThreshold uint,
+	metaVersion int16,
+	v2Hash *protocol.IDv2,
 ) (model.Torrent, error) {
 	name := info.BestName()
 
@@ -204,6 +208,8 @@ func createTorrentModel(
 
 	return model.Torrent{
 		InfoHash:    hash,
+		InfoHashV2:  v2Hash,
+		MetaVersion: metaVersion,
 		Name:        name,
 		Size:        uint(info.TotalLength()),
 		Private:     private,

@@ -21,6 +21,8 @@ type Importer interface {
 type Item struct {
 	Source          string
 	InfoHash        protocol.ID
+	InfoHashV2      *protocol.IDv2
+	MetaVersion     int16
 	Name            string
 	Size            uint
 	Private         bool
@@ -255,8 +257,15 @@ func (i *activeImport) persistItems(items ...Item) error {
 }
 
 func createTorrentModel(info Info, item Item) model.Torrent {
+	metaVersion := item.MetaVersion
+	if metaVersion == 0 {
+		metaVersion = 1
+	}
+
 	t := model.Torrent{
 		InfoHash:    item.InfoHash,
+		InfoHashV2:  item.InfoHashV2,
+		MetaVersion: metaVersion,
 		Name:        item.Name,
 		Size:        item.Size,
 		Private:     item.Private,

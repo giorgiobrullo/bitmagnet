@@ -101,6 +101,8 @@ this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names`):a
     ${Ny}`,Vy=ze`
     fragment Torrent on Torrent {
   infoHash
+  infoHashV2
+  metaVersion
   name
   size
   filesStatus

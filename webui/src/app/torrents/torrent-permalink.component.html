@@ -29,6 +29,12 @@
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
+        @if (torrentContent.torrent.infoHashV2) {
+          <p class="info-hash-v2">
+            <strong>{{ t("torrents.v2_hash") }}:</strong>
+            <code>{{ torrentContent.torrent.infoHashV2 }}</code>
+          </p>
+        }
         <app-torrent-content
           [torrentContent]="torrentContent"
           [heading]="false"

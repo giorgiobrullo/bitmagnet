@@ -2,6 +2,8 @@
 
 fragment Torrent on Torrent {
   infoHash
+  infoHashV2
+  metaVersion
   name
   size
   filesStatus

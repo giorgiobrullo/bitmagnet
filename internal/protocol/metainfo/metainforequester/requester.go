@@ -80,7 +80,7 @@ type HandshakeInfo struct {
 
 type Response struct {
 	HandshakeInfo
-	Info metainfo.Info
+	metainfo.ParseResult
 }
 
 func (r requester) Request(ctx context.Context, infoHash protocol.ID, addr netip.AddrPort) (Response, error) {
@@ -122,7 +122,7 @@ func (r requester) Request(ctx context.Context, infoHash protocol.ID, addr netip
 
 	return Response{
 		HandshakeInfo: hsInfo,
-		Info:          parsed,
+		ParseResult:   parsed,
 	}, nil
 }
 
@@ -160,7 +160,7 @@ func (r requester) connect(ctx context.Context, addr netip.AddrPort) (conn *net.
 	return tcpConn, nil
 }
 
-var myExBits = NewPeerExtensionBits(ExtensionBitDht, ExtensionBitLtep)
+var myExBits = NewPeerExtensionBits(ExtensionBitDht, ExtensionBitLtep, ExtensionBitV2)
 
 func btHandshake(rw io.ReadWriter, infoHash protocol.ID, clientID protocol.ID) (HandshakeInfo, error) {
 	handshakeBytes := make([]byte, 0, 68)
