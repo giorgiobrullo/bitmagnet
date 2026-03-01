@@ -13,7 +13,9 @@ import (
 )
 
 func (t *Torrent) AfterFind(_ *gorm.DB) error {
-	if t.Files != nil {
+	if t.Files == nil {
+		t.Files = []TorrentFile{}
+	} else {
 		sort.Slice(t.Files, func(i, j int) bool {
 			return t.Files[i].Path < t.Files[j].Path
 		})
