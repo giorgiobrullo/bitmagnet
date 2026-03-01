@@ -181,7 +181,7 @@ export class QueueChartAdapterTimeline implements ChartAdapter<Result, "line"> {
               label: (context) => {
                 return context.dataset.yAxisID === "yCount"
                   ? context.formattedValue
-                  : this.formatDuration(context.parsed.y);
+                  : this.formatDuration(context.parsed.y!);
               },
             },
           },

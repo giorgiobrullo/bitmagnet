@@ -82,7 +82,7 @@ export class TorrentFilesDatasource implements ITorrentFilesDatasource {
           fetchPolicy: "no-cache",
         },
       )
-      .pipe(map((r) => r.data.torrent.files))
+      .pipe(map((r) => r.data!.torrent.files))
       .pipe(
         catchError((err: Error) => {
           this.errorsService.addError(
