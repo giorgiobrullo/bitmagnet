@@ -47,8 +47,26 @@ func (f features) JSONSchema() JSONSchema {
 					},
 				},
 			},
+			"keywords_override": map[string]any{
+				"type": []string{"object", "null"},
+				"additionalProperties": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "string",
+					},
+				},
+			},
 			"extensions": map[string]any{
 				"type": "object",
+				"additionalProperties": map[string]any{
+					"type": "array",
+					"items": map[string]any{
+						"type": "string",
+					},
+				},
+			},
+			"extensions_override": map[string]any{
+				"type": []string{"object", "null"},
 				"additionalProperties": map[string]any{
 					"type": "array",
 					"items": map[string]any{

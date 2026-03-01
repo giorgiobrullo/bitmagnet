@@ -203,7 +203,7 @@ func TestClassifier(t *testing.T) {
 
 			mocks := newTestClassifierMocks(t)
 
-			source, sourceErr := yamlSourceProvider{rawSourceProvider: coreSourceProvider{}}.source()
+			source, sourceErr := coreSourceProvider{}.provider().source()
 			if sourceErr != nil {
 				t.Fatal(sourceErr)
 				return
