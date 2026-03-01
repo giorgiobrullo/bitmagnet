@@ -37,7 +37,8 @@
     left: 340px;
     top: 0;
     height: 56px;
-    padding-top: 14px;
+    display: flex;
+    align-items: center;
     a {
       margin-right: 10px;
     }
