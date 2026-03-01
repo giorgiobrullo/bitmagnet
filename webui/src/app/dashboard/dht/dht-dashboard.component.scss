@@ -50,13 +50,19 @@
   opacity: 0.4;
 }
 
-.dht-controls {
+.dht-controls-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dht-controls {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
 
   mat-button-toggle-group {
     --mat-standard-button-toggle-height: 32px;
@@ -69,50 +75,28 @@
   gap: 4px;
 }
 
+.dht-refresh-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.4;
+}
+
 .dht-refresh-select {
   width: 120px;
   --mat-form-field-container-height: 32px;
 }
 
-.dht-charts-row {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-.dht-composition-card {
-  mat-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 12px;
-    gap: 8px;
-  }
+.dht-composition {
+  flex-shrink: 0;
+  width: 100px;
 
   app-chart {
     width: 100%;
-    max-width: 160px;
-  }
-
-  .dht-stat-label {
-    margin-bottom: 4px;
   }
 }
 
 .dht-charts {
   display: grid;
   gap: 16px;
-}
-
-@media (max-width: 720px) {
-  .dht-charts-row {
-    grid-template-columns: 1fr;
-  }
-
-  .dht-composition-card {
-    app-chart {
-      max-width: 120px;
-    }
-  }
 }

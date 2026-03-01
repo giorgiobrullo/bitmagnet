@@ -47,68 +47,67 @@
       </mat-card>
     </div>
 
-    <!-- Timeframe controls -->
-    <div class="dht-controls">
-      <mat-button-toggle-group
-        [value]="metricsController.params.timeframe"
-        (change)="metricsController.setTimeframe($event.value)"
-      >
-        @for (name of timeframeNames; track name) {
-          <mat-button-toggle [value]="name">
-            {{ t("dashboard.interval." + name) }}
-          </mat-button-toggle>
-        }
-      </mat-button-toggle-group>
-
-      <div class="dht-controls-right">
-        <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
-          <mat-select
-            [value]="metricsController.params.autoRefresh"
-            (valueChange)="metricsController.setAutoRefreshInterval($event)"
-          >
-            @for (name of autoRefreshIntervalNames; track name) {
-              <mat-option [value]="name">
-                {{ t("dashboard.interval." + name) }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button
-          mat-icon-button
-          (click)="metricsController.refresh()"
-          matTooltip="Refresh"
+    <!-- Controls row: timeframe left, doughnut right -->
+    <div class="dht-controls-row">
+      <div class="dht-controls">
+        <mat-button-toggle-group
+          [value]="metricsController.params.timeframe"
+          (change)="metricsController.setTimeframe($event.value)"
         >
-          <mat-icon>sync</mat-icon>
-        </button>
+          @for (name of timeframeNames; track name) {
+            <mat-button-toggle [value]="name">
+              {{ t("dashboard.interval." + name) }}
+            </mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+
+        <div class="dht-controls-right">
+          <mat-icon class="dht-refresh-icon">autorenew</mat-icon>
+          <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
+            <mat-select
+              [value]="metricsController.params.autoRefresh"
+              (valueChange)="metricsController.setAutoRefreshInterval($event)"
+            >
+              @for (name of autoRefreshIntervalNames; track name) {
+                <mat-option [value]="name">
+                  {{ t("dashboard.interval." + name) }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button
+            mat-icon-button
+            (click)="metricsController.refresh()"
+            matTooltip="Refresh"
+          >
+            <mat-icon>sync</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="dht-composition">
+        <app-chart
+          [title]="''"
+          [$data]="composition$"
+          [adapter]="compositionAdapter"
+          [height]="100"
+          [width]="100"
+        />
       </div>
     </div>
 
-    <!-- Composition + Charts -->
-    <div class="dht-charts-row">
-      <mat-card class="dht-composition-card">
-        <mat-card-content>
-          <div class="dht-stat-label">{{ t("dashboard.dht.composition") }}</div>
-          <app-chart
-            [title]="''"
-            [$data]="composition$"
-            [adapter]="compositionAdapter"
-            [height]="160"
-            [width]="160"
-          />
-        </mat-card-content>
-      </mat-card>
-      <div class="dht-charts">
-        <app-chart
-          [title]="t('dashboard.dht.nodes_over_time')"
-          [$data]="snapshots$"
-          [adapter]="nodesChartAdapter"
-        />
-        <app-chart
-          [title]="t('dashboard.dht.hash_discovery')"
-          [$data]="snapshots$"
-          [adapter]="hashesChartAdapter"
-        />
-      </div>
+    <!-- Charts -->
+    <div class="dht-charts">
+      <app-chart
+        [title]="t('dashboard.dht.nodes_over_time')"
+        [$data]="snapshots$"
+        [adapter]="nodesChartAdapter"
+      />
+      <app-chart
+        [title]="t('dashboard.dht.hash_discovery')"
+        [$data]="snapshots$"
+        [adapter]="hashesChartAdapter"
+      />
     </div>
   </div>
 </ng-container>
