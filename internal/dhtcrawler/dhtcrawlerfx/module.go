@@ -25,7 +25,9 @@ func New() fx.Option {
 						if err != nil {
 							panic(err)
 						}
-						addrs = append(addrs, addr.AddrPort())
+						addrPort := addr.AddrPort()
+						addrPort = netip.AddrPortFrom(addrPort.Addr().Unmap(), addrPort.Port())
+						addrs = append(addrs, addrPort)
 					}
 					return addrs
 				},
