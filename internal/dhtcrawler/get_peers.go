@@ -34,12 +34,16 @@ func (c *crawler) runGetPeers(ctx context.Context) {
 			}
 		}
 
-		c.kTable.BatchCommand(
-			ktable.PutHash{ID: req.infoHash, Peers: hashPeers4},
-		)
-		c.kTable6.BatchCommand(
-			ktable.PutHash{ID: req.infoHash, Peers: hashPeers6},
-		)
+		if len(hashPeers4) > 0 {
+			c.kTable.BatchCommand(
+				ktable.PutHash{ID: req.infoHash, Peers: hashPeers4},
+			)
+		}
+		if len(hashPeers6) > 0 {
+			c.kTable6.BatchCommand(
+				ktable.PutHash{ID: req.infoHash, Peers: hashPeers6},
+			)
+		}
 
 		select {
 		case <-ctx.Done():
