@@ -23,7 +23,7 @@ func (builder) Key() string {
 	return "torznab"
 }
 
-func (b builder) Apply(e *gin.Engine) error {
+func (b builder) Apply(r gin.IRouter) error {
 	client, err := b.lazyClient.Get()
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (b builder) Apply(e *gin.Engine) error {
 		config: b.config,
 		client: client,
 	}
-	e.GET("/torznab/*any", h.handleRequest)
+	r.GET("/torznab/*any", h.handleRequest)
 
 	return nil
 }

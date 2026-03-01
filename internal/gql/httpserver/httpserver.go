@@ -19,6 +19,7 @@ import (
 
 type Params struct {
 	fx.In
+	Config httpserver.Config
 	Schema lazy.Lazy[graphql.ExecutableSchema]
 	Logger *zap.SugaredLogger
 }
@@ -31,20 +32,22 @@ type Result struct {
 func New(p Params) Result {
 	return Result{
 		Option: &builder{
-			schema: p.Schema,
+			schema:   p.Schema,
+			basePath: p.Config.BasePath,
 		},
 	}
 }
 
 type builder struct {
-	schema lazy.Lazy[graphql.ExecutableSchema]
+	schema   lazy.Lazy[graphql.ExecutableSchema]
+	basePath string
 }
 
 func (builder) Key() string {
 	return "graphql"
 }
 
-func (b builder) Apply(e *gin.Engine) error {
+func (b builder) Apply(r gin.IRouter) error {
 	schema, err := b.schema.Get()
 	if err != nil {
 		return err
@@ -52,13 +55,13 @@ func (b builder) Apply(e *gin.Engine) error {
 
 	gql := newServer(schema)
 
-	e.POST("/graphql", func(c *gin.Context) {
+	r.POST("/graphql", func(c *gin.Context) {
 		gql.ServeHTTP(c.Writer, c.Request)
 	})
 
-	pg := playground.Handler("GraphQL playground", "/graphql")
+	pg := playground.Handler("GraphQL playground", b.basePath+"/graphql")
 
-	e.GET("/graphql", func(c *gin.Context) {
+	r.GET("/graphql", func(c *gin.Context) {
 		pg.ServeHTTP(c.Writer, c.Request)
 	})
 

@@ -19,15 +19,15 @@ func (*builder) Key() string {
 	return "rest_api"
 }
 
-func (b *builder) Apply(e *gin.Engine) error {
+func (b *builder) Apply(r gin.IRouter) error {
 	s, err := b.lazySearch.Get()
 	if err != nil {
 		return err
 	}
 
 	h := handler{search: s}
-	e.GET("/api/v1/search/imdb/:imdb_id", h.handleIMDBSearch)
-	e.GET("/api/v1/search/tmdb/:content_type/:tmdb_id", h.handleTMDBSearch)
+	r.GET("/api/v1/search/imdb/:imdb_id", h.handleIMDBSearch)
+	r.GET("/api/v1/search/tmdb/:content_type/:tmdb_id", h.handleTMDBSearch)
 
 	return nil
 }

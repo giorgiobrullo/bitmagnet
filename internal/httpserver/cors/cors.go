@@ -54,8 +54,8 @@ func (corsOption) Key() string {
 	return "cors"
 }
 
-func (c corsOption) Apply(g *gin.Engine) error {
-	g.Use(c.handlerFunc)
+func (c corsOption) Apply(r gin.IRouter) error {
+	r.Use(c.handlerFunc)
 	return nil
 }
 

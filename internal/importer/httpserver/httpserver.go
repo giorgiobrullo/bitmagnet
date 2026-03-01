@@ -46,13 +46,13 @@ func (builder) Key() string {
 	return "import"
 }
 
-func (b builder) Apply(e *gin.Engine) error {
+func (b builder) Apply(r gin.IRouter) error {
 	i, err := b.importer.Get()
 	if err != nil {
 		return err
 	}
 
-	e.POST("/import", func(ctx *gin.Context) {
+	r.POST("/import", func(ctx *gin.Context) {
 		b.handle(ctx, i)
 	})
 

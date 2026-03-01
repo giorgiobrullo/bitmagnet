@@ -37,7 +37,7 @@ func (handlerBuilder) Key() string {
 	return "health"
 }
 
-func (b handlerBuilder) Apply(e *gin.Engine) error {
+func (b handlerBuilder) Apply(r gin.IRouter) error {
 	checker, err := b.Checker.Get()
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func (b handlerBuilder) Apply(e *gin.Engine) error {
 
 	handler := NewHandler(checker)
 
-	e.GET("/status", func(c *gin.Context) {
+	r.GET("/status", func(c *gin.Context) {
 		handler(c.Writer, c.Request)
 	})
 

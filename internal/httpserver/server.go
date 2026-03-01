@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/bitmagnet-io/bitmagnet/internal/httpserver/ginzap"
@@ -40,12 +41,17 @@ func New(p Params) Result {
 					gin.SetMode(p.Config.GinMode)
 					g := gin.New()
 					g.Use(ginzap.Ginzap(p.Logger.Named("gin"), time.RFC3339, true), gin.Recovery())
+					basePath := strings.TrimRight(p.Config.BasePath, "/")
+					var r gin.IRouter = g
+					if basePath != "" {
+						r = g.Group(basePath)
+					}
 					options, optionsErr := resolveOptions(p.Config.Options, p.Options)
 					if optionsErr != nil {
 						return optionsErr
 					}
 					for _, o := range options {
-						if buildErr := o.Apply(g); buildErr != nil {
+						if buildErr := o.Apply(r); buildErr != nil {
 							return buildErr
 						}
 					}
@@ -129,5 +135,5 @@ func resolveOptions(param []string, options []Option) ([]Option, error) {
 
 type Option interface {
 	Key() string
-	Apply(engine *gin.Engine) error
+	Apply(r gin.IRouter) error
 }

@@ -5,6 +5,11 @@ type Config struct {
 	GinMode      string
 	Cors         CorsConfig
 	Options      []string
+	// BasePath is the URL path prefix under which the HTTP server registers all routes.
+	// Use this when running behind a reverse proxy that forwards a sub-path without stripping it
+	// (e.g., proxy_pass http://localhost:3333/bitmagnet/ → BasePath = "/bitmagnet").
+	// Leave empty for default behavior (routes at root).
+	BasePath string
 }
 
 type CorsConfig struct {
