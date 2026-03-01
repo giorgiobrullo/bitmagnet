@@ -10,15 +10,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func newSourceProvider(config Config, tmdbConfig tmdb.Config) sourceProvider {
+func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, porndbEnabled bool, stashdbEnabled bool, musicbrainzEnabled bool, openlibraryEnabled bool, comicvineEnabled bool, igdbEnabled bool, anilistEnabled bool, jikanEnabled bool, googlebooksEnabled bool) sourceProvider {
 	var providers []sourceProvider
 	providers = append(providers, coreSourceProvider{}.provider())
 	providers = append(providers, xdgSourceProvider{}.providers()...)
 	providers = append(providers, cwdSourceProvider{}.providers()...)
 	providers = append(providers, extraSourceProvider{}.providers()...)
 	providers = append(providers, configSourceProvider{
-		config:      config,
-		tmdbEnabled: tmdbConfig.Enabled,
+		config:             config,
+		tmdbEnabled:        tmdbConfig.Enabled,
+		llmEnabled:         llmEnabled,
+		porndbEnabled:      porndbEnabled,
+		stashdbEnabled:     stashdbEnabled,
+		musicbrainzEnabled:  musicbrainzEnabled,
+		openlibraryEnabled:  openlibraryEnabled,
+		comicvineEnabled:    comicvineEnabled,
+		igdbEnabled:         igdbEnabled,
+		anilistEnabled:      anilistEnabled,
+		jikanEnabled:        jikanEnabled,
+		googlebooksEnabled:  googlebooksEnabled,
 	})
 
 	return mergeSourceProvider{providers: providers}
@@ -149,8 +159,18 @@ func (cwdSourceProvider) providers() []sourceProvider {
 }
 
 type configSourceProvider struct {
-	config      Config
-	tmdbEnabled bool
+	config             Config
+	tmdbEnabled        bool
+	llmEnabled         bool
+	porndbEnabled      bool
+	stashdbEnabled     bool
+	musicbrainzEnabled bool
+	openlibraryEnabled bool
+	comicvineEnabled   bool
+	igdbEnabled        bool
+	anilistEnabled     bool
+	jikanEnabled       bool
+	googlebooksEnabled bool
 }
 
 func (c configSourceProvider) source() (Source, error) {
@@ -165,6 +185,46 @@ func (c configSourceProvider) source() (Source, error) {
 
 	if !c.tmdbEnabled {
 		fs["tmdb_enabled"] = false
+	}
+
+	if !c.llmEnabled {
+		fs["llm_enabled"] = false
+	}
+
+	if !c.porndbEnabled {
+		fs["porndb_enabled"] = false
+	}
+
+	if !c.stashdbEnabled {
+		fs["stashdb_enabled"] = false
+	}
+
+	if !c.musicbrainzEnabled {
+		fs["musicbrainz_enabled"] = false
+	}
+
+	if !c.openlibraryEnabled {
+		fs["openlibrary_enabled"] = false
+	}
+
+	if !c.comicvineEnabled {
+		fs["comicvine_enabled"] = false
+	}
+
+	if !c.igdbEnabled {
+		fs["igdb_enabled"] = false
+	}
+
+	if !c.anilistEnabled {
+		fs["anilist_enabled"] = false
+	}
+
+	if !c.jikanEnabled {
+		fs["jikan_enabled"] = false
+	}
+
+	if !c.googlebooksEnabled {
+		fs["googlebooks_enabled"] = false
 	}
 
 	return Source{

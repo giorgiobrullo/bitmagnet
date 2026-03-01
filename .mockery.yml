@@ -16,6 +16,24 @@ packages:
   github.com/bitmagnet-io/bitmagnet/internal/tmdb:
     interfaces:
       Client:
+  github.com/bitmagnet-io/bitmagnet/internal/llm:
+    interfaces:
+      Client:
+  github.com/bitmagnet-io/bitmagnet/internal/porndb:
+    interfaces:
+      Client:
+  github.com/bitmagnet-io/bitmagnet/internal/stashdb:
+    interfaces:
+      Client:
+  github.com/bitmagnet-io/bitmagnet/internal/musicbrainz:
+    interfaces:
+      Client:
+  github.com/bitmagnet-io/bitmagnet/internal/openlibrary:
+    interfaces:
+      Client:
+  github.com/bitmagnet-io/bitmagnet/internal/comicvine:
+    interfaces:
+      Client:
   github.com/bitmagnet-io/bitmagnet/internal/torznab:
     interfaces:
       Client:

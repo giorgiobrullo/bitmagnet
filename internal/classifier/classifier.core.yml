@@ -44,6 +44,17 @@ workflows:
                 if_action:
                   set_content_type: music
                 else_action: unmatched
+            # match games:
+            - if_else:
+                condition:
+                  or:
+                    - "torrent.files.map(f, f.extension in extensions.game ? f.size : - f.size).sum() > 0"
+                    - and:
+                        - "([torrent.baseName] + torrent.files.map(f, f.basePath)).join(' ').matches(keywords.game)"
+                        - "torrent.files.map(f, f.extension in extensions.video || f.extension in extensions.software ? f.size : - f.size).sum() > 100*mb"
+                if_action:
+                  set_content_type: game
+                else_action: unmatched
             # match software:
             - if_else:
                 condition: "torrent.files.map(f, f.extension in extensions.software ? f.size : - f.size).sum() > 0"
@@ -58,6 +69,11 @@ workflows:
                     - "([torrent.baseName] + torrent.files.map(f, f.basePath)).join(' ').matches(keywords.xxx)"
                 if_action:
                   set_content_type: xxx
+                else_action: unmatched
+            # LLM fallback: classify content type when regex-based detection fails:
+            - if_else:
+                condition: "flags.apis_enabled && flags.llm_enabled"
+                if_action: classify_with_llm
                 else_action: unmatched
     # if the name contains a full date, attach it to the result as it's a good indicator of content type:
     - find_match:
@@ -87,6 +103,11 @@ workflows:
             # parse video-related attributes from the torrent name;
             # if the content type wasn't previously specified and the name format doesn't suggest a movie or TV show, a "no match" will be returned:
             - parse_video_content
+            # LLM fallback: extract title/year when regex parsing fails:
+            - if_else:
+                condition: "flags.apis_enabled && flags.llm_enabled && !result.hasBaseTitle"
+                if_action: classify_with_llm
+                else_action: unmatched
     # if content isn't already attached, and a base title has been parsed, then search for the content, either from the local `content` table or an API integration:
     - if_else:
         condition: "!result.hasAttachedContent && result.hasBaseTitle"
@@ -96,9 +117,60 @@ workflows:
                 condition: "flags.local_search_enabled"
                 if_action: attach_local_content_by_search
                 else_action: unmatched
+            # PornDB search for xxx content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.porndb_enabled && result.contentType == contentType.xxx"
+                if_action: attach_porndb_content_by_search
+                else_action: unmatched
+            # StashDB search for xxx content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.stashdb_enabled && result.contentType == contentType.xxx"
+                if_action: attach_stashdb_content_by_search
+                else_action: unmatched
+            # MusicBrainz search for music content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.musicbrainz_enabled && result.contentType == contentType.music"
+                if_action: attach_musicbrainz_content_by_search
+                else_action: unmatched
+            # OpenLibrary search for ebook/audiobook content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.openlibrary_enabled && result.contentType in [contentType.ebook, contentType.audiobook]"
+                if_action: attach_openlibrary_content_by_search
+                else_action: unmatched
+            # Google Books fallback for ebook/audiobook content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.googlebooks_enabled && result.contentType in [contentType.ebook, contentType.audiobook]"
+                if_action: attach_googlebooks_content_by_search
+                else_action: unmatched
+            # Comic Vine search for comic content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.comicvine_enabled && result.contentType == contentType.comic"
+                if_action: attach_comicvine_content_by_search
+                else_action: unmatched
+            # AniList manga fallback for comic content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.anilist_enabled && result.contentType == contentType.comic"
+                if_action: attach_anilist_manga_by_search
+                else_action: unmatched
+            # IGDB search for game content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.igdb_enabled && result.contentType == contentType.game"
+                if_action: attach_igdb_content_by_search
+                else_action: unmatched
+            # TMDB search for movie/tv/xxx content:
             - if_else:
                 condition: "flags.apis_enabled && flags.tmdb_enabled"
                 if_action: attach_tmdb_content_by_search
+                else_action: unmatched
+            # AniList anime fallback for tv_show content (after TMDB):
+            - if_else:
+                condition: "flags.apis_enabled && flags.anilist_enabled && result.contentType == contentType.tv_show"
+                if_action: attach_anilist_content_by_search
+                else_action: unmatched
+            # Jikan (MAL) anime fallback for tv_show content (after AniList):
+            - if_else:
+                condition: "flags.apis_enabled && flags.jikan_enabled && result.contentType == contentType.tv_show"
+                if_action: attach_jikan_content_by_search
                 else_action: unmatched
     # delete specific content types based on the configured flags:
     - if_else:
@@ -126,6 +198,28 @@ extensions:
     - cbr
     - cbt
     - cbz
+  game:
+    - nsp
+    - xci
+    - nds
+    - 3ds
+    - cia
+    - gba
+    - gb
+    - gbc
+    - sfc
+    - smc
+    - z64
+    - n64
+    - v64
+    - gcm
+    - gcz
+    - rvz
+    - wbfs
+    - wad
+    - vpk
+    - pbp
+    - chd
   ebook:
     - azw
     - azw3
@@ -136,6 +230,8 @@ extensions:
     - docx
     - djvu
     - epub
+    - fb2
+    - kfx
     - lit
     - mobi
     - odt
@@ -193,8 +289,12 @@ keywords:
     - books?
     - (un)?abridged
     - narrated
+    - narrator
+    - "read by"
     - novels?
     - "*biograph*"
+    - audible
+    - librivox
   music:
     - discography
     - music
@@ -218,6 +318,41 @@ keywords:
     - reggae
     - rock
     - trance
+  game:
+    # scene groups
+    - fitgirl
+    - codex
+    - skidrow
+    - plaza
+    - dodi
+    - elamigos
+    - kaoskrew
+    - empress
+    - tenoke
+    - tinyiso
+    - razor1911
+    - cpy
+    - flt
+    - goldberg
+    - chronos
+    - rune
+    - hoodlum
+    - darksiders
+    # release terms
+    - repack
+    - gog
+    - steamrip
+    - dlc
+    - crack(ed)?
+    - trainer
+    # platform indicators
+    - nintendo
+    - playstation
+    - xbox
+    - ps2
+    - ps3
+    - ps4
+    - ps5
   xxx:
     - anal
     - ass
@@ -270,11 +405,31 @@ flag_definitions:
   local_search_enabled: bool
   apis_enabled: bool
   tmdb_enabled: bool
+  llm_enabled: bool
+  porndb_enabled: bool
+  stashdb_enabled: bool
+  musicbrainz_enabled: bool
+  openlibrary_enabled: bool
+  comicvine_enabled: bool
+  igdb_enabled: bool
+  anilist_enabled: bool
+  jikan_enabled: bool
+  googlebooks_enabled: bool
   delete_content_types: content_type_list
   delete_xxx: bool
 flags:
   local_search_enabled: true
   apis_enabled: true
   tmdb_enabled: true
+  llm_enabled: false
+  porndb_enabled: false
+  stashdb_enabled: false
+  musicbrainz_enabled: false
+  openlibrary_enabled: false
+  comicvine_enabled: false
+  igdb_enabled: false
+  anilist_enabled: false
+  jikan_enabled: false
+  googlebooks_enabled: false
   delete_content_types: []
   delete_xxx: false

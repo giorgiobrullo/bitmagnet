@@ -27,6 +27,16 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/queue/queuefx"
 	"github.com/bitmagnet-io/bitmagnet/internal/restapi/restapifx"
 	"github.com/bitmagnet-io/bitmagnet/internal/telemetry/telemetryfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/anilist/anilistfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/comicvine/comicvinefx"
+	"github.com/bitmagnet-io/bitmagnet/internal/googlebooks/googlebooksfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/igdb/igdbfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/jikan/jikanfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/llm/llmfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/musicbrainz/musicbrainzfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/openlibrary/openlibraryfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/porndb/porndbfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/stashdb/stashdbfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/tmdb/tmdbfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/torznab/torznabfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/validation/validationfx"
@@ -56,6 +66,16 @@ func New() fx.Option {
 		queuefx.New(),
 		restapifx.New(),
 		telemetryfx.New(),
+		anilistfx.New(),
+		comicvinefx.New(),
+		googlebooksfx.New(),
+		igdbfx.New(),
+		jikanfx.New(),
+		llmfx.New(),
+		musicbrainzfx.New(),
+		openlibraryfx.New(),
+		porndbfx.New(),
+		stashdbfx.New(),
 		tmdbfx.New(),
 		torznabfx.New(),
 		validationfx.New(),
