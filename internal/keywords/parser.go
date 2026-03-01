@@ -14,6 +14,11 @@ import (
 )
 
 func NewRegexFromKeywords(kws ...string) (*regexp.Regexp, error) {
+	if len(kws) == 0 {
+		// Return a regex that never matches anything.
+		return regexp.Compile(`\b$^`)
+	}
+
 	tokens, err := NewRexTokensFromKeywords(kws...)
 	if err != nil {
 		return nil, err
