@@ -18,19 +18,29 @@ func (c *crawler) reseedBootstrapNodes(ctx context.Context) {
 			return
 		case <-time.After(interval):
 			for _, strAddr := range c.bootstrapNodes {
-				addr, err := net.ResolveUDPAddr("udp", strAddr)
+				host, portStr, err := net.SplitHostPort(strAddr)
 				if err != nil {
-					c.logger.Warnf("failed to resolve bootstrap node address: %s", err)
+					c.logger.Warnf("failed to parse bootstrap node address %s: %s", strAddr, err)
 					continue
 				}
-				addrPort := addr.AddrPort()
-				// Normalize IPv4-mapped IPv6 addresses to plain IPv4:
-				addrPort = netip.AddrPortFrom(addrPort.Addr().Unmap(), addrPort.Port())
-				select {
-				case <-ctx.Done():
-					return
-				case c.nodesForPing.In() <- ktable.NewNode(ktable.ID{}, addrPort):
+				port, err := net.LookupPort("udp", portStr)
+				if err != nil {
+					c.logger.Warnf("failed to resolve port for %s: %s", strAddr, err)
 					continue
+				}
+				ips, err := net.DefaultResolver.LookupNetIP(ctx, "ip", host)
+				if err != nil {
+					c.logger.Warnf("failed to resolve bootstrap node %s: %s", strAddr, err)
+					continue
+				}
+				for _, ip := range ips {
+					addrPort := netip.AddrPortFrom(ip.Unmap(), uint16(port))
+					select {
+					case <-ctx.Done():
+						return
+					case c.nodesForPing.In() <- ktable.NewNode(ktable.ID{}, addrPort):
+						continue
+					}
 				}
 			}
 		}
