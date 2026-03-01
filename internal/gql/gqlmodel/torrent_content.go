@@ -142,6 +142,11 @@ func (t TorrentContentQuery) Search(
 	if input.Facets != nil {
 		options = append(options, torrentContentFacetsOption(*input.Facets))
 
+		// Handle publishedAt filter
+		if publishedAt, ok := input.Facets.PublishedAt.ValueOK(); ok && *publishedAt != "" {
+			options = append(options, q.Where(search.TorrentContentPublishedAtCriteria(*publishedAt)))
+		}
+
 		// Handle size range filters
 		if sizeRange, ok := input.Facets.SizeRange.ValueOK(); ok {
 			sizeCriteria := search.SizeRangeCriteria{

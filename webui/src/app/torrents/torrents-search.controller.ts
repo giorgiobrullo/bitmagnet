@@ -56,6 +56,7 @@ export type TorrentSearchControls = {
     videoResolution: FacetInput<generated.VideoResolution>;
     videoSource: FacetInput<generated.VideoSource>;
   };
+  publishedAt?: string;
   sizeRange?: SizeRangeFilter;
   selectedTorrent?: TorrentSelection;
 };
@@ -125,6 +126,7 @@ const controlsToQueryVariables = (
             max: ctrl.sizeRange.max ? Number(ctrl.sizeRange.max) : undefined,
           }
         : undefined,
+      publishedAt: ctrl.publishedAt || undefined,
     },
   },
 });
@@ -336,6 +338,14 @@ export class TorrentsSearchController {
       ...ctrl,
       limit: event.pageSize,
       page: event.page,
+    }));
+  }
+
+  setPublishedAt(timeFrame?: string) {
+    this.update((ctrl) => ({
+      ...ctrl,
+      page: 1,
+      publishedAt: timeFrame || undefined,
     }));
   }
 

@@ -26,6 +26,8 @@ import { intParam, stringListParam, stringParam } from "../util/query-string";
 import { AppModule } from "../app.module";
 import { DocumentTitleComponent } from "../layout/document-title.component";
 import { IntEstimatePipe } from "../pipes/int-estimate.pipe";
+import { TimeFrameSelectorComponent } from "../dates/time-frame-selector.component";
+import { TimeFrame } from "../dates/parse-timeframe";
 import { TorrentsBulkActionsComponent } from "./torrents-bulk-actions.component";
 import { contentTypeList, contentTypeMap } from "./content-types";
 import {
@@ -67,6 +69,7 @@ import {
     TorrentsBulkActionsComponent,
     TorrentsTableComponent,
     IntEstimatePipe,
+    TimeFrameSelectorComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -94,6 +97,7 @@ export class TorrentsSearchComponent implements OnInit, OnDestroy {
   compactColumns = compactColumns;
 
   queryString = new FormControl("");
+  timeFrameExpression = "";
   minSizeControl = new FormControl<number | null>(null);
   maxSizeControl = new FormControl<number | null>(null);
   minSizeUnitControl = new FormControl<string>("MiB");
@@ -232,11 +236,28 @@ export class TorrentsSearchComponent implements OnInit, OnDestroy {
     this.dataSource.refresh();
   }
 
+  // Handle time frame selection change
+  onTimeFrameChanged(timeFrame: TimeFrame): void {
+    if (timeFrame.isValid) {
+      this.timeFrameExpression = timeFrame.expression;
+      this.controller.setPublishedAt(this.timeFrameExpression);
+      this.dataSource.refresh();
+    }
+  }
+
   ngOnInit(): void {
     this.subscriptions.push(
       this.route.queryParams.subscribe((params) => {
         // Update query string
         this.queryString.setValue(stringParam(params, "query") ?? null);
+
+        // Get time frame
+        const timeFrame = stringParam(params, "published_at");
+        if (timeFrame) {
+          this.timeFrameExpression = timeFrame;
+        } else {
+          this.timeFrameExpression = "";
+        }
 
         // Get size values
         const minSize = intParam(params, "min_size");
@@ -323,6 +344,7 @@ const initControls: TorrentSearchControls = {
 const paramsToControls = (params: Params): TorrentSearchControls => {
   const queryString = stringParam(params, "query");
   const activeFacets = stringListParam(params, "facets");
+  const publishedAt = stringParam(params, "published_at");
   let selectedTorrent: TorrentSelection | undefined;
   const selectedTorrentParam = stringParam(params, "torrent");
   if (selectedTorrentParam) {
@@ -438,6 +460,7 @@ const paramsToControls = (params: Params): TorrentSearchControls => {
     limit: intParam(params, "limit") ?? defaultLimit,
     page: intParam(params, "page") ?? 1,
     selectedTorrent,
+    publishedAt,
     sizeRange,
     facets: facets.reduce<TorrentSearchControls["facets"]>((acc, facet) => {
       const active = activeFacets?.includes(facet.key) ?? false;
@@ -580,6 +603,7 @@ const controlsToParams = (
     content_type: ctrl.contentType,
     order: orderBy?.field,
     desc,
+    published_at: ctrl.publishedAt,
     ...sizeParams,
     ...(ctrl.selectedTorrent
       ? {
