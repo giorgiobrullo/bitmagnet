@@ -235,7 +235,7 @@ export class DhtChartAdapterComposition
         plugins: {
           legend: {
             display: params.legend,
-            position: "bottom",
+            position: "left",
             labels: { color: foreground, boxWidth: 12 },
           },
         },
