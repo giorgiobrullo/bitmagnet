@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"slices"
 	"sync"
@@ -136,7 +137,7 @@ func (m *manager) flush(ctx context.Context) error {
 			_, err = bf.ReadFrom(obj)
 			obj.Close()
 
-			if err != nil {
+			if err != nil && !errors.Is(err, io.EOF) {
 				return fmt.Errorf("failed to read current bloom filter: %w", err)
 			}
 		}
@@ -153,18 +154,20 @@ func (m *manager) flush(ctx context.Context) error {
 		}
 	}
 
-	for _, hash := range hashes {
-		bf.Add(hash[:])
-	}
+	if len(hashes) > 0 {
+		for _, hash := range hashes {
+			bf.Add(hash[:])
+		}
 
-	obj, err := lobs.Open(ctx, oid, pgx.LargeObjectModeWrite)
-	if err != nil {
-		return fmt.Errorf("failed to open large object for writing: %w", err)
-	}
+		obj, err := lobs.Open(ctx, oid, pgx.LargeObjectModeWrite)
+		if err != nil {
+			return fmt.Errorf("failed to open large object for writing: %w", err)
+		}
 
-	_, err = bf.WriteTo(obj)
-	if err != nil {
-		return fmt.Errorf("failed to write to large object: %w", err)
+		_, err = bf.WriteTo(obj)
+		if err != nil {
+			return fmt.Errorf("failed to write to large object: %w", err)
+		}
 	}
 
 	now := time.Now()
@@ -197,5 +200,5 @@ func (m *manager) flush(ctx context.Context) error {
 }
 
 func (m *manager) shouldFlush() bool {
-	return len(m.buffer) >= m.maxBufferSize || time.Since(m.lastFlushedAt) >= m.maxFlushWait
+	return len(m.buffer) >= m.maxBufferSize || (len(m.buffer) > 0 && time.Since(m.lastFlushedAt) >= m.maxFlushWait)
 }
