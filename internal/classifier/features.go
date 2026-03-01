@@ -32,6 +32,7 @@ var defaultFeatures = newFeatures(
 	),
 	actions(
 		addTagAction{},
+		removeTagAction{},
 		attachLocalContentByIDAction{},
 		attachLocalContentBySearchAction{},
 		attachTMDBContentByIDAction{},
