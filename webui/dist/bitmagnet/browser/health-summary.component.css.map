@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/health/health-summary.component.scss"],
-  "sourcesContent": [".table-health {\n  th,\n  td {\n    padding-right: 20px;\n  }\n  th {\n    text-align: left;\n  }\n}\n"],
-  "mappings": ";AACE,CAAA,aAAA;AAAA,CAAA,aAAA;AAEE,iBAAA;;AAEF,CAJA,aAIA;AACE,cAAA;;",
-  "names": []
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/charting/color-utils.ts"],
-  "sourcesContent": ["/** Convert an rgb(...) string to rgba(..., alpha). */\nexport function withAlpha(rgb: string | undefined, alpha: number): string {\n  if (!rgb) return `rgba(128,128,128,${alpha})`;\n  const match = rgb.match(/\\d+/g);\n  if (!match || match.length < 3) return `rgba(128,128,128,${alpha})`;\n  return `rgba(${match[0]},${match[1]},${match[2]},${alpha})`;\n}\n"],
-  "mappings": ";AACM,SAAU,UAAU,KAAyB,OAAa;AAC9D,MAAI,CAAC;AAAK,WAAO,oBAAoB,KAAK;AAC1C,QAAM,QAAQ,IAAI,MAAM,MAAM;AAC9B,MAAI,CAAC,SAAS,MAAM,SAAS;AAAG,WAAO,oBAAoB,KAAK;AAChE,SAAO,QAAQ,MAAM,CAAC,CAAC,IAAI,MAAM,CAAC,CAAC,IAAI,MAAM,CAAC,CAAC,IAAI,KAAK;AAC1D;",
-  "names": []
-}
