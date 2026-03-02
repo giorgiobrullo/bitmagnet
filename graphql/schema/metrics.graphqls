@@ -47,6 +47,7 @@ type TorrentLibrarySnapshot {
   bucket: DateTime!
   totalCount: Int!
   totalSize: Float!
+  classifiedCount: Int!
 }
 
 type TorrentLibraryMetricsResult {

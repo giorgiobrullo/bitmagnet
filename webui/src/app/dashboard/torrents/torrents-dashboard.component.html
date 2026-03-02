@@ -83,6 +83,14 @@
     </div>
     <div class="torrent-charts-full">
       <app-chart
+        [title]="t('dashboard.torrents.classification_rate')"
+        [$data]="snapshots$"
+        [adapter]="classificationRateAdapter"
+        [height]="250"
+      />
+    </div>
+    <div class="torrent-charts-full">
+      <app-chart
         [title]="t('dashboard.torrents.throughput')"
         [$data]="throughputController.result$"
         [adapter]="throughputAdapter"

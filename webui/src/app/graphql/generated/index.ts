@@ -710,6 +710,7 @@ export type TorrentLibraryMetricsResult = {
 export type TorrentLibrarySnapshot = {
   __typename?: 'TorrentLibrarySnapshot';
   bucket: Scalars['DateTime']['output'];
+  classifiedCount: Scalars['Int']['output'];
   totalCount: Scalars['Int']['output'];
   totalSize: Scalars['Float']['output'];
 };
@@ -1065,7 +1066,7 @@ export type TorrentLibraryMetricsQueryVariables = Exact<{
 }>;
 
 
-export type TorrentLibraryMetricsQuery = { __typename?: 'Query', torrent: { __typename?: 'TorrentQuery', libraryMetrics: { __typename?: 'TorrentLibraryMetricsResult', snapshots: Array<{ __typename?: 'TorrentLibrarySnapshot', bucket: string, totalCount: number, totalSize: number }> }, contentBreakdown: Array<{ __typename?: 'TorrentContentBreakdown', contentType: string, count: number }> } };
+export type TorrentLibraryMetricsQuery = { __typename?: 'Query', torrent: { __typename?: 'TorrentQuery', libraryMetrics: { __typename?: 'TorrentLibraryMetricsResult', snapshots: Array<{ __typename?: 'TorrentLibrarySnapshot', bucket: string, classifiedCount: number, totalCount: number, totalSize: number }> }, contentBreakdown: Array<{ __typename?: 'TorrentContentBreakdown', contentType: string, count: number }> } };
 
 export type TorrentMetricsQueryVariables = Exact<{
   input: TorrentMetricsQueryInput;
@@ -1628,6 +1629,7 @@ export const TorrentLibraryMetricsDocument = gql`
         bucket
         totalCount
         totalSize
+        classifiedCount
       }
     }
     contentBreakdown {

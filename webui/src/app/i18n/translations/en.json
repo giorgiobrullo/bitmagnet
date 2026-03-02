@@ -114,6 +114,7 @@
       "library_growth": "Library Growth",
       "storage_growth": "Storage Growth",
       "content_breakdown": "Content Breakdown",
+      "classification_rate": "Classification Rate",
       "throughput": "Throughput"
     },
     "queues": {

@@ -36,9 +36,10 @@ type LibraryMetricsRequest struct {
 }
 
 type LibrarySnapshot struct {
-	Bucket     time.Time
-	TotalCount int
-	TotalSize  float64
+	Bucket          time.Time
+	TotalCount      int
+	TotalSize       float64
+	ClassifiedCount int
 }
 
 type ContentCount struct {
@@ -186,7 +187,8 @@ func (c *client) RequestLibraryMetrics(ctx context.Context, req LibraryMetricsRe
 	if err := db.WithContext(ctx).Raw(`SELECT
 		date_trunc(?, recorded_at) AS bucket,
 		AVG(total_count)::int AS total_count,
-		AVG(total_size)::float8 AS total_size
+		AVG(total_size)::float8 AS total_size,
+		AVG(classified_count)::int AS classified_count
 		FROM torrent_snapshots `+
 		conditionClause+
 		` GROUP BY bucket ORDER BY bucket`,
@@ -248,7 +250,10 @@ func (c *client) recordSnapshot() {
 	}
 
 	if err := db.Exec(
-		"INSERT INTO torrent_snapshots (total_count, total_size) SELECT COUNT(*), COALESCE(SUM(size), 0) FROM torrents",
+		`INSERT INTO torrent_snapshots (total_count, total_size, classified_count)
+		SELECT COUNT(*), COALESCE(SUM(size), 0),
+		(SELECT COUNT(DISTINCT info_hash) FROM torrent_contents WHERE content_type IS NOT NULL)
+		FROM torrents`,
 	).Error; err != nil {
 		c.logger.Warnw("failed to record torrent snapshot", "error", err)
 	}

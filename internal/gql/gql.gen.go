@@ -383,9 +383,10 @@ type ComplexityRoot struct {
 	}
 
 	TorrentLibrarySnapshot struct {
-		Bucket     func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-		TotalSize  func(childComplexity int) int
+		Bucket          func(childComplexity int) int
+		ClassifiedCount func(childComplexity int) int
+		TotalCount      func(childComplexity int) int
+		TotalSize       func(childComplexity int) int
 	}
 
 	TorrentListSourcesResult struct {
@@ -1977,6 +1978,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TorrentLibrarySnapshot.Bucket(childComplexity), true
 
+	case "TorrentLibrarySnapshot.classifiedCount":
+		if e.complexity.TorrentLibrarySnapshot.ClassifiedCount == nil {
+			break
+		}
+
+		return e.complexity.TorrentLibrarySnapshot.ClassifiedCount(childComplexity), true
+
 	case "TorrentLibrarySnapshot.totalCount":
 		if e.complexity.TorrentLibrarySnapshot.TotalCount == nil {
 			break
@@ -2740,6 +2748,7 @@ type TorrentLibrarySnapshot {
   bucket: DateTime!
   totalCount: Int!
   totalSize: Float!
+  classifiedCount: Int!
 }
 
 type TorrentLibraryMetricsResult {
@@ -13315,6 +13324,8 @@ func (ec *executionContext) fieldContext_TorrentLibraryMetricsResult_snapshots(_
 				return ec.fieldContext_TorrentLibrarySnapshot_totalCount(ctx, field)
 			case "totalSize":
 				return ec.fieldContext_TorrentLibrarySnapshot_totalSize(ctx, field)
+			case "classifiedCount":
+				return ec.fieldContext_TorrentLibrarySnapshot_classifiedCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TorrentLibrarySnapshot", field.Name)
 		},
@@ -13449,6 +13460,50 @@ func (ec *executionContext) fieldContext_TorrentLibrarySnapshot_totalSize(_ cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TorrentLibrarySnapshot_classifiedCount(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentLibrarySnapshot) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentLibrarySnapshot_classifiedCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ClassifiedCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentLibrarySnapshot_classifiedCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentLibrarySnapshot",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21496,6 +21551,11 @@ func (ec *executionContext) _TorrentLibrarySnapshot(ctx context.Context, sel ast
 			}
 		case "totalSize":
 			out.Values[i] = ec._TorrentLibrarySnapshot_totalSize(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "classifiedCount":
+			out.Values[i] = ec._TorrentLibrarySnapshot_classifiedCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

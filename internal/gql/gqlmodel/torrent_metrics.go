@@ -63,9 +63,10 @@ func (t TorrentQuery) LibraryMetrics(
 	result := make([]gen.TorrentLibrarySnapshot, len(snapshots))
 	for i, s := range snapshots {
 		result[i] = gen.TorrentLibrarySnapshot{
-			Bucket:     s.Bucket,
-			TotalCount: s.TotalCount,
-			TotalSize:  s.TotalSize,
+			Bucket:          s.Bucket,
+			TotalCount:      s.TotalCount,
+			TotalSize:       s.TotalSize,
+			ClassifiedCount: s.ClassifiedCount,
 		}
 	}
 

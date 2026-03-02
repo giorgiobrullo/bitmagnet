@@ -235,9 +235,10 @@ type TorrentLibraryMetricsResult struct {
 }
 
 type TorrentLibrarySnapshot struct {
-	Bucket     time.Time `json:"bucket"`
-	TotalCount int       `json:"totalCount"`
-	TotalSize  float64   `json:"totalSize"`
+	Bucket          time.Time `json:"bucket"`
+	TotalCount      int       `json:"totalCount"`
+	TotalSize       float64   `json:"totalSize"`
+	ClassifiedCount int       `json:"classifiedCount"`
 }
 
 type TorrentListSourcesResult struct {

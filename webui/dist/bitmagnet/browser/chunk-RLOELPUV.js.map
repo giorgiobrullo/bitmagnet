@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/graphql/util/filter-complete.ts"],
+  "sourcesContent": ["import { ObservableQuery } from \"@apollo/client/core\";\nimport { filter, OperatorFunction } from \"rxjs\";\n\nexport function filterComplete<T>(): OperatorFunction<\n  ObservableQuery.Result<T, \"complete\" | \"empty\" | \"streaming\" | \"partial\">,\n  ObservableQuery.Result<T, \"complete\">\n> {\n  return filter(\n    (\n      result: ObservableQuery.Result<\n        T,\n        \"complete\" | \"empty\" | \"streaming\" | \"partial\"\n      >,\n    ) => result.dataState === \"complete\",\n  );\n}\n"],
+  "mappings": ";;;;;AAGM,SAAU,iBAAc;AAI5B,SAAO,OACL,CACE,WAIG,OAAO,cAAc,UAAU;AAExC;",
+  "names": []
+}

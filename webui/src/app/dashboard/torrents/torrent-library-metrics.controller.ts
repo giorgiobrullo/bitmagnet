@@ -15,6 +15,7 @@ export type TorrentLibrarySnapshot = {
   bucket: string;
   totalCount: number;
   totalSize: number;
+  classifiedCount: number;
 };
 
 export type TorrentContentCount = {
@@ -137,6 +138,7 @@ export class TorrentLibraryMetricsController {
               bucket: s.bucket,
               totalCount: s.totalCount,
               totalSize: s.totalSize,
+              classifiedCount: s.classifiedCount,
             })),
             contentBreakdown: (data?.contentBreakdown ?? []).map((c) => ({
               contentType: c.contentType,

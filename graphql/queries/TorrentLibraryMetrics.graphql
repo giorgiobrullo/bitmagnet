@@ -5,6 +5,7 @@ query TorrentLibraryMetrics($input: TorrentLibraryMetricsInput!) {
         bucket
         totalCount
         totalSize
+        classifiedCount
       }
     }
     contentBreakdown {

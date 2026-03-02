@@ -18,6 +18,7 @@ import {
 import { TorrentChartAdapterLibraryGrowth } from "./torrent-chart-adapter.library";
 import { TorrentChartAdapterStorageGrowth } from "./torrent-chart-adapter.storage";
 import { TorrentChartAdapterContentBreakdown } from "./torrent-chart-adapter.content";
+import { TorrentChartAdapterClassificationRate } from "./torrent-chart-adapter.classification";
 import { TorrentChartAdapterTimeline } from "./torrent-chart-adapter.timeline";
 import { TorrentMetricsController } from "./torrent-metrics.controller";
 import {
@@ -67,6 +68,9 @@ export class TorrentsDashboardComponent implements OnInit, OnDestroy {
   );
   protected readonly contentAdapter = inject(
     TorrentChartAdapterContentBreakdown,
+  );
+  protected readonly classificationRateAdapter = inject(
+    TorrentChartAdapterClassificationRate,
   );
   protected readonly throughputAdapter = inject(TorrentChartAdapterTimeline);
 
