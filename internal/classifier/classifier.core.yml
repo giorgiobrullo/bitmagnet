@@ -10,6 +10,8 @@ workflows:
         condition: "result.contentType == contentType.unknown"
         if_action:
           find_match:
+            # detect JAV codes (e.g., SONE-436, FC2-PPV-4496995) — before extension-based detection:
+            - detect_jav
             # match audiobooks:
             - if_else:
                 condition:
@@ -70,8 +72,6 @@ workflows:
                 if_action:
                   set_content_type: xxx
                 else_action: unmatched
-            # detect JAV codes (e.g., SONE-436, FC2-PPV-4496995):
-            - detect_jav
             # LLM fallback: classify content type when regex-based detection fails:
             - if_else:
                 condition: "flags.apis_enabled && flags.llm_enabled"
