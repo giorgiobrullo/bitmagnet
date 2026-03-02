@@ -10,6 +10,7 @@ type Config struct {
 	MinConfidence  float64
 	RateLimit      time.Duration
 	RateLimitBurst int
+	Concurrency    int
 }
 
 func NewDefaultConfig() Config {
@@ -20,5 +21,6 @@ func NewDefaultConfig() Config {
 		MinConfidence:  0.7,
 		RateLimit:      334 * time.Millisecond,
 		RateLimitBurst: 2,
+		Concurrency:    2,
 	}
 }

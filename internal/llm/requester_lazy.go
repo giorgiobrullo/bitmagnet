@@ -43,7 +43,11 @@ func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 	}
 
 	limiter := rate.NewLimiter(rate.Every(config.RateLimit), config.RateLimitBurst)
-	sem := semaphore.NewWeighted(2)
+	concurrency := int64(config.Concurrency)
+	if concurrency < 1 {
+		concurrency = 2
+	}
+	sem := semaphore.NewWeighted(concurrency)
 
 	r := requesterLogger{
 		requester: requester{
