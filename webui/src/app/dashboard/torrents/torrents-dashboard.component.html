@@ -40,28 +40,30 @@
         }
       </mat-button-toggle-group>
 
-      <div class="torrent-controls-right">
-        <mat-icon class="torrent-refresh-icon">autorenew</mat-icon>
-        <mat-form-field subscriptSizing="dynamic" class="torrent-refresh-select">
-          <mat-select
-            [value]="metricsController.params.autoRefresh"
-            (valueChange)="metricsController.setAutoRefreshInterval($event)"
-          >
-            @for (name of autoRefreshIntervalNames; track name) {
-              <mat-option [value]="name">
-                {{ t("dashboard.interval." + name) }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button
-          mat-icon-button
-          (click)="metricsController.refresh()"
-          matTooltip="Refresh"
-        >
-          <mat-icon>sync</mat-icon>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="refreshMenu"
+        [matTooltip]="t('dashboard.dht.auto_refresh') + ': ' + t('dashboard.interval.' + metricsController.params.autoRefresh)"
+      >
+        <mat-icon>sync</mat-icon>
+      </button>
+      <mat-menu #refreshMenu="matMenu">
+        <button mat-menu-item (click)="metricsController.refresh()">
+          {{ t("dashboard.dht.refresh_now") }}
         </button>
-      </div>
+        <mat-divider />
+        @for (name of autoRefreshIntervalNames; track name) {
+          <button
+            mat-menu-item
+            (click)="metricsController.setAutoRefreshInterval(name)"
+          >
+            @if (metricsController.params.autoRefresh === name) {
+              <mat-icon>check</mat-icon>
+            }
+            {{ t("dashboard.interval." + name) }}
+          </button>
+        }
+      </mat-menu>
     </div>
 
     <!-- Charts -->
@@ -70,16 +72,21 @@
         [title]="t('dashboard.torrents.library_growth')"
         [$data]="snapshots$"
         [adapter]="libraryGrowthAdapter"
+        [height]="250"
       />
       <app-chart
         [title]="t('dashboard.torrents.storage_growth')"
         [$data]="snapshots$"
         [adapter]="storageGrowthAdapter"
+        [height]="250"
       />
+    </div>
+    <div class="torrent-charts-full">
       <app-chart
         [title]="t('dashboard.torrents.throughput')"
         [$data]="throughputController.result$"
         [adapter]="throughputAdapter"
+        [height]="250"
       />
     </div>
   </div>
