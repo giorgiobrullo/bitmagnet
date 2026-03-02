@@ -62,30 +62,50 @@
   }
 }
 
-.dht-controls-right {
+
+// Summary row: donut + quick stats
+.dht-summary-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.dht-refresh-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  opacity: 0.4;
-}
-
-.dht-refresh-select {
-  width: 120px;
-  --mat-form-field-container-height: 32px;
+  gap: 24px;
+  margin-bottom: 16px;
 }
 
 .dht-composition {
-  margin-bottom: 16px;
-  max-width: 280px;
+  flex: 0 0 auto;
+  width: 200px;
 }
 
+.dht-summary-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.dht-summary-stat {
+  text-align: center;
+}
+
+.dht-summary-value {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+// Charts side by side
 .dht-charts {
   display: grid;
   gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .dht-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .dht-summary-row {
+    flex-wrap: wrap;
+  }
 }

@@ -66,6 +66,7 @@ export class DhtDashboardComponent implements OnInit, OnDestroy {
 
   serverUptime = "";
   lastSuccess = "";
+  hashRate = "";
 
   private subscriptions: Subscription[] = [];
 
@@ -105,10 +106,11 @@ export class DhtDashboardComponent implements OnInit, OnDestroy {
       }),
     );
 
-    // Historical metrics → charts
+    // Historical metrics → charts + hash rate
     this.subscriptions.push(
       this.metricsController.result$.subscribe((result) => {
         this.snapshotsSubject.next(result.snapshots);
+        this.computeHashRate(result.snapshots);
       }),
     );
   }
@@ -116,6 +118,45 @@ export class DhtDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.metricsController.destroy();
+  }
+
+  get ipv4Pct(): number {
+    const total =
+      this.dhtStats.result.nodesCountIPv4 +
+      this.dhtStats.result.nodesCountIPv6;
+    return total > 0
+      ? Math.round(
+          (this.dhtStats.result.nodesCountIPv4 / total) * 100,
+        )
+      : 0;
+  }
+
+  get ipv6Pct(): number {
+    const total =
+      this.dhtStats.result.nodesCountIPv4 +
+      this.dhtStats.result.nodesCountIPv6;
+    return total > 0 ? 100 - this.ipv4Pct : 0;
+  }
+
+  private computeHashRate(snapshots: DhtMetricsSnapshot[]) {
+    if (snapshots.length < 2) {
+      this.hashRate = "";
+      return;
+    }
+    const first = snapshots[0];
+    const last = snapshots[snapshots.length - 1];
+    const totalFirst = first.hashesIPv4 + first.hashesIPv6;
+    const totalLast = last.hashesIPv4 + last.hashesIPv6;
+    const diff = totalLast - totalFirst;
+    const timeDiffHrs =
+      (new Date(last.bucket).getTime() -
+        new Date(first.bucket).getTime()) /
+      (1000 * 60 * 60);
+    if (timeDiffHrs <= 0 || diff <= 0) {
+      this.hashRate = "—";
+      return;
+    }
+    this.hashRate = Math.round(diff / timeDiffHrs).toLocaleString();
   }
 
   private pushSparkline(buffer: number[], value: number) {

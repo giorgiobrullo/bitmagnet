@@ -60,51 +60,75 @@
         }
       </mat-button-toggle-group>
 
-      <div class="dht-controls-right">
-        <mat-icon class="dht-refresh-icon">autorenew</mat-icon>
-        <mat-form-field subscriptSizing="dynamic" class="dht-refresh-select">
-          <mat-select
-            [value]="metricsController.params.autoRefresh"
-            (valueChange)="metricsController.setAutoRefreshInterval($event)"
-          >
-            @for (name of autoRefreshIntervalNames; track name) {
-              <mat-option [value]="name">
-                {{ t("dashboard.interval." + name) }}
-              </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button
-          mat-icon-button
-          (click)="metricsController.refresh()"
-          matTooltip="Refresh"
-        >
-          <mat-icon>sync</mat-icon>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="refreshMenu"
+        [matTooltip]="t('dashboard.dht.auto_refresh') + ': ' + t('dashboard.interval.' + metricsController.params.autoRefresh)"
+      >
+        <mat-icon>sync</mat-icon>
+      </button>
+      <mat-menu #refreshMenu="matMenu">
+        <button mat-menu-item (click)="metricsController.refresh()">
+          {{ t("dashboard.dht.refresh_now") }}
         </button>
+        <mat-divider />
+        @for (name of autoRefreshIntervalNames; track name) {
+          <button
+            mat-menu-item
+            (click)="metricsController.setAutoRefreshInterval(name)"
+          >
+            @if (metricsController.params.autoRefresh === name) {
+              <mat-icon>check</mat-icon>
+            }
+            {{ t("dashboard.interval." + name) }}
+          </button>
+        }
+      </mat-menu>
+    </div>
+
+    <!-- Summary Row: Composition donut + quick stats -->
+    <div class="dht-summary-row">
+      <div class="dht-composition">
+        <app-chart
+          [title]="''"
+          [$data]="composition$"
+          [adapter]="compositionAdapter"
+          [height]="80"
+        />
+      </div>
+      <div class="dht-summary-stats">
+        <div class="dht-summary-stat">
+          <div class="dht-summary-value">{{ ipv4Pct }}%</div>
+          <div class="dht-stat-label">IPv4</div>
+        </div>
+        <div class="dht-summary-stat">
+          <div class="dht-summary-value">{{ ipv6Pct }}%</div>
+          <div class="dht-stat-label">IPv6</div>
+        </div>
+        <div class="dht-summary-stat">
+          <div class="dht-summary-value">{{ hashRate || "—" }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.hash_rate") }}</div>
+        </div>
+        <div class="dht-summary-stat">
+          <div class="dht-summary-value">{{ lastSuccess || "—" }}</div>
+          <div class="dht-stat-label">{{ t("dashboard.dht.last_success") }}</div>
+        </div>
       </div>
     </div>
 
-    <!-- Composition -->
-    <div class="dht-composition">
-      <app-chart
-        [title]="''"
-        [$data]="composition$"
-        [adapter]="compositionAdapter"
-        [height]="80"
-      />
-    </div>
-
-    <!-- Charts -->
+    <!-- Charts - side by side -->
     <div class="dht-charts">
       <app-chart
         [title]="t('dashboard.dht.nodes_over_time')"
         [$data]="snapshots$"
         [adapter]="nodesChartAdapter"
+        [height]="250"
       />
       <app-chart
         [title]="t('dashboard.dht.hash_discovery')"
         [$data]="snapshots$"
         [adapter]="hashesChartAdapter"
+        [height]="250"
       />
     </div>
   </div>

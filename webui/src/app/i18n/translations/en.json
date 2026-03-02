@@ -72,7 +72,9 @@
       "nodes_over_time": "Nodes Over Time",
       "hash_discovery": "Hash Discovery",
       "composition": "Network Composition",
-      "auto_refresh": "Auto-refresh"
+      "auto_refresh": "Auto-refresh",
+      "hash_rate": "Hashes/hr",
+      "refresh_now": "Refresh now"
     },
     "event": {
       "created": "Created",
@@ -195,8 +197,10 @@
     "worker": "Worker",
     "workers": {
       "dht_crawler": "DHT crawler",
+      "dht_snapshots": "DHT snapshots",
       "http_server": "HTTP server",
-      "queue_server": "Queue server"
+      "queue_server": "Queue server",
+      "torrent_snapshots": "Torrent snapshots"
     }
   },
   "languages": {
