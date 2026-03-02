@@ -2,6 +2,7 @@ package classifier
 
 import (
 	"github.com/bitmagnet-io/bitmagnet/internal/classifier/classification"
+	"github.com/bitmagnet-io/bitmagnet/internal/classifier/parsers"
 	"github.com/bitmagnet-io/bitmagnet/internal/llm"
 	"github.com/bitmagnet-io/bitmagnet/internal/model"
 )
@@ -32,7 +33,7 @@ func (classifyWithLLMAction) compileAction(ctx compilerContext) (action, error) 
 			}
 
 			input := llm.ClassifyInput{
-				Name: ctx.torrent.Name,
+				Name: parsers.SanitizeTorrentName(ctx.torrent.Name),
 			}
 			for _, f := range ctx.torrent.Files {
 				ext := ""

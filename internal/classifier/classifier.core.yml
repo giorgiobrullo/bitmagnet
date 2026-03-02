@@ -70,6 +70,8 @@ workflows:
                 if_action:
                   set_content_type: xxx
                 else_action: unmatched
+            # detect JAV codes (e.g., SONE-436, FC2-PPV-4496995):
+            - detect_jav
             # LLM fallback: classify content type when regex-based detection fails:
             - if_else:
                 condition: "flags.apis_enabled && flags.llm_enabled"
@@ -120,6 +122,11 @@ workflows:
             - if_else:
                 condition: "flags.local_search_enabled"
                 if_action: attach_local_content_by_search
+                else_action: unmatched
+            # PornDB JAV search for xxx content (tries JAV-specific endpoint first):
+            - if_else:
+                condition: "flags.apis_enabled && flags.porndb_enabled && result.contentType == contentType.xxx"
+                if_action: attach_porndb_jav_by_search
                 else_action: unmatched
             # PornDB search for xxx content:
             - if_else:
