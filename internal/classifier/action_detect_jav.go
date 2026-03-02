@@ -37,13 +37,6 @@ var (
 	}
 )
 
-// videoExtensions used to check if a torrent contains video files.
-var videoExtensions = map[string]bool{
-	"mp4": true, "mkv": true, "avi": true, "mov": true, "wmv": true,
-	"flv": true, "m4v": true, "mpg": true, "mpeg": true, "ts": true,
-	"vob": true, "iso": true,
-}
-
 // ExtractJAVCode tries to extract a JAV code from a torrent name.
 // Returns the normalized code (e.g., "SONE-436", "FC2-PPV-4496995") or empty string.
 func ExtractJAVCode(name string) string {
@@ -71,23 +64,9 @@ func (detectJAVAction) compileAction(ctx compilerContext) (action, error) {
 		run: func(ctx executionContext) (classification.Result, error) {
 			cl := ctx.result
 
-			// Check if torrent has video files.
-			hasVideo := false
-			for _, f := range ctx.torrent.Files {
-				if f.Extension.Valid && videoExtensions[strings.ToLower(f.Extension.String)] {
-					hasVideo = true
-					break
-				}
-			}
-			// For single-file torrents, check the torrent extension.
-			if !hasVideo && ctx.torrent.Extension.Valid {
-				hasVideo = videoExtensions[strings.ToLower(ctx.torrent.Extension.String)]
-			}
-			if !hasVideo {
-				return cl, classification.ErrUnmatched
-			}
-
-			// Try to extract a JAV code.
+			// Try to extract a JAV code from the torrent name.
+			// The regex is anchored to the start of the name (after optional brackets),
+			// making false positives very unlikely. No file extension check needed.
 			code := ExtractJAVCode(ctx.torrent.Name)
 			if code == "" {
 				return cl, classification.ErrUnmatched
