@@ -184,7 +184,7 @@ func New(params Params) Result {
 			dependencies: dependencies{
 				search: localSearchSemaphore{
 					search:    localSearch{s},
-					semaphore: make(chan struct{}, 1),
+					semaphore: make(chan struct{}, 5),
 				},
 				tmdbClient:       tmdbClient,
 				llmClient:        llmClient,

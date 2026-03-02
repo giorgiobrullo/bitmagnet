@@ -48,6 +48,13 @@ func JobTimeout(d time.Duration) Option {
 	}
 }
 
+// CheckInterval configures how often the handler polls for new jobs.
+func CheckInterval(d time.Duration) Option {
+	return func(h *Handler) {
+		h.CheckInterval = d
+	}
+}
+
 // Concurrency configures Queue handlers to process jobs concurrently
 // the default concurrency is the number of (v)CPUs on the machine running Queue
 func Concurrency(c int) Option {

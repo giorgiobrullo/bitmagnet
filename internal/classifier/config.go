@@ -15,6 +15,6 @@ type Config struct {
 func NewDefaultConfig() Config {
 	return Config{
 		Workflow:    "default",
-		Concurrency: 10,
+		Concurrency: 20,
 	}
 }
