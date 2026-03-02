@@ -93,7 +93,7 @@ func Exec(ctx context.Context, handler Handler, job model.QueueJob) (err error) 
 	defer cancel()
 
 	errCh := make(chan error, 1)
-	done := make(chan bool)
+	done := make(chan bool, 1) // buffered so the goroutine can always exit cleanly
 
 	go func(ctx context.Context) {
 		defer func() {
@@ -119,7 +119,7 @@ func Exec(ctx context.Context, handler Handler, job model.QueueJob) (err error) 
 		}()
 
 		errCh <- handler.Handle(ctx, job)
-	}(ctx)
+	}(timeoutCtx) // use timeoutCtx so downstream goroutines are cancelled on timeout
 
 	select {
 	case <-done:
