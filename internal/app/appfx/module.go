@@ -29,6 +29,8 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/telemetry/telemetryfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/anilist/anilistfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/comicvine/comicvinefx"
+	"github.com/bitmagnet-io/bitmagnet/internal/deezer/deezerfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/discogs/discogsfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/googlebooks/googlebooksfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/igdb/igdbfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan/jikanfx"
@@ -68,6 +70,8 @@ func New() fx.Option {
 		telemetryfx.New(),
 		anilistfx.New(),
 		comicvinefx.New(),
+		deezerfx.New(),
+		discogsfx.New(),
 		googlebooksfx.New(),
 		igdbfx.New(),
 		jikanfx.New(),

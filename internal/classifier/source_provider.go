@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, porndbEnabled bool, stashdbEnabled bool, musicbrainzEnabled bool, openlibraryEnabled bool, comicvineEnabled bool, igdbEnabled bool, anilistEnabled bool, jikanEnabled bool, googlebooksEnabled bool) sourceProvider {
+func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, porndbEnabled bool, stashdbEnabled bool, discogsEnabled bool, deezerEnabled bool, musicbrainzEnabled bool, openlibraryEnabled bool, comicvineEnabled bool, igdbEnabled bool, anilistEnabled bool, jikanEnabled bool, googlebooksEnabled bool) sourceProvider {
 	var providers []sourceProvider
 	providers = append(providers, coreSourceProvider{}.provider())
 	providers = append(providers, xdgSourceProvider{}.providers()...)
@@ -22,6 +22,8 @@ func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, p
 		llmEnabled:         llmEnabled,
 		porndbEnabled:      porndbEnabled,
 		stashdbEnabled:     stashdbEnabled,
+		discogsEnabled:      discogsEnabled,
+		deezerEnabled:       deezerEnabled,
 		musicbrainzEnabled:  musicbrainzEnabled,
 		openlibraryEnabled:  openlibraryEnabled,
 		comicvineEnabled:    comicvineEnabled,
@@ -164,6 +166,8 @@ type configSourceProvider struct {
 	llmEnabled         bool
 	porndbEnabled      bool
 	stashdbEnabled     bool
+	discogsEnabled     bool
+	deezerEnabled      bool
 	musicbrainzEnabled bool
 	openlibraryEnabled bool
 	comicvineEnabled   bool
@@ -187,6 +191,8 @@ func (c configSourceProvider) source() (Source, error) {
 	fs["llm_enabled"] = c.llmEnabled
 	fs["porndb_enabled"] = c.porndbEnabled
 	fs["stashdb_enabled"] = c.stashdbEnabled
+	fs["discogs_enabled"] = c.discogsEnabled
+	fs["deezer_enabled"] = c.deezerEnabled
 	fs["musicbrainz_enabled"] = c.musicbrainzEnabled
 	fs["openlibrary_enabled"] = c.openlibraryEnabled
 	fs["comicvine_enabled"] = c.comicvineEnabled

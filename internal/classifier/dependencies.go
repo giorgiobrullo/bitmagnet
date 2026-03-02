@@ -6,6 +6,8 @@ import (
 
 	"github.com/bitmagnet-io/bitmagnet/internal/anilist"
 	"github.com/bitmagnet-io/bitmagnet/internal/comicvine"
+	"github.com/bitmagnet-io/bitmagnet/internal/deezer"
+	"github.com/bitmagnet-io/bitmagnet/internal/discogs"
 	"github.com/bitmagnet-io/bitmagnet/internal/googlebooks"
 	"github.com/bitmagnet-io/bitmagnet/internal/igdb"
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan"
@@ -26,6 +28,8 @@ type dependencies struct {
 	llmMinConfidence  float64
 	porndbClient      porndb.Client
 	stashdbClient     stashdb.Client
+	discogsClient      discogs.Client
+	deezerClient       deezer.Client
 	musicbrainzClient  musicbrainz.Client
 	openlibraryClient  openlibrary.Client
 	comicvineClient    comicvine.Client

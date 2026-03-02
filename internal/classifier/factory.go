@@ -6,6 +6,8 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/anilist"
 	"github.com/bitmagnet-io/bitmagnet/internal/comicvine"
 	"github.com/bitmagnet-io/bitmagnet/internal/database/search"
+	"github.com/bitmagnet-io/bitmagnet/internal/deezer"
+	"github.com/bitmagnet-io/bitmagnet/internal/discogs"
 	"github.com/bitmagnet-io/bitmagnet/internal/googlebooks"
 	"github.com/bitmagnet-io/bitmagnet/internal/igdb"
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan"
@@ -27,6 +29,8 @@ type Params struct {
 	LlmConfig          llm.Config
 	PorndbConfig       porndb.Config
 	StashdbConfig      stashdb.Config
+	DiscogsConfig      discogs.Config
+	DeezerConfig       deezer.Config
 	MusicbrainzConfig  musicbrainz.Config
 	OpenlibraryConfig  openlibrary.Config
 	ComicvineConfig    comicvine.Config
@@ -39,6 +43,8 @@ type Params struct {
 	LlmClient          lazy.Lazy[llm.Client]
 	PorndbClient       lazy.Lazy[porndb.Client]
 	StashdbClient      lazy.Lazy[stashdb.Client]
+	DiscogsClient      lazy.Lazy[discogs.Client]
+	DeezerClient       lazy.Lazy[deezer.Client]
 	MusicbrainzClient  lazy.Lazy[musicbrainz.Client]
 	OpenlibraryClient  lazy.Lazy[openlibrary.Client]
 	ComicvineClient    lazy.Lazy[comicvine.Client]
@@ -89,6 +95,22 @@ func New(params Params) Result {
 		if params.StashdbConfig.Enabled {
 			if c, stashdbErr := params.StashdbClient.Get(); stashdbErr == nil {
 				stashdbClient = c
+			}
+		}
+
+		// Discogs client is optional — gracefully nil if disabled or errored.
+		var discogsClient discogs.Client
+		if params.DiscogsConfig.Enabled {
+			if c, dcErr := params.DiscogsClient.Get(); dcErr == nil {
+				discogsClient = c
+			}
+		}
+
+		// Deezer client is optional — gracefully nil if disabled or errored.
+		var deezerClient deezer.Client
+		if params.DeezerConfig.Enabled {
+			if c, dzErr := params.DeezerClient.Get(); dzErr == nil {
+				deezerClient = c
 			}
 		}
 
@@ -169,6 +191,8 @@ func New(params Params) Result {
 				llmMinConfidence: params.LlmConfig.MinConfidence,
 				porndbClient:     porndbClient,
 				stashdbClient:     stashdbClient,
+				discogsClient:      discogsClient,
+				deezerClient:       deezerClient,
 				musicbrainzClient:  musicbrainzClient,
 				openlibraryClient:  openlibraryClient,
 				comicvineClient:    comicvineClient,
@@ -182,7 +206,7 @@ func New(params Params) Result {
 		}, nil
 	})
 	lsrc := lazy.New[Source](func() (Source, error) {
-		src, err := newSourceProvider(params.Config, params.TmdbConfig, params.LlmConfig.Enabled, params.PorndbConfig.Enabled, params.StashdbConfig.Enabled, params.MusicbrainzConfig.Enabled, params.OpenlibraryConfig.Enabled, params.ComicvineConfig.Enabled, params.IgdbConfig.Enabled, params.AnilistConfig.Enabled, params.JikanConfig.Enabled, params.GooglebooksConfig.Enabled).source()
+		src, err := newSourceProvider(params.Config, params.TmdbConfig, params.LlmConfig.Enabled, params.PorndbConfig.Enabled, params.StashdbConfig.Enabled, params.DiscogsConfig.Enabled, params.DeezerConfig.Enabled, params.MusicbrainzConfig.Enabled, params.OpenlibraryConfig.Enabled, params.ComicvineConfig.Enabled, params.IgdbConfig.Enabled, params.AnilistConfig.Enabled, params.JikanConfig.Enabled, params.GooglebooksConfig.Enabled).source()
 		if err != nil {
 			return Source{}, err
 		}

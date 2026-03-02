@@ -40,6 +40,8 @@ var defaultFeatures = newFeatures(
 		attachAnilistContentBySearchAction{},
 		attachAnilistMangaBySearchAction{},
 		attachComicvineContentBySearchAction{},
+		attachDeezerContentBySearchAction{},
+		attachDiscogsContentBySearchAction{},
 		attachGooglebooksContentBySearchAction{},
 		attachIgdbContentBySearchAction{},
 		attachJikanContentBySearchAction{},

@@ -136,6 +136,16 @@ workflows:
                 condition: "flags.apis_enabled && flags.musicbrainz_enabled && result.contentType == contentType.music"
                 if_action: attach_musicbrainz_content_by_search
                 else_action: unmatched
+            # Discogs search for music content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.discogs_enabled && result.contentType == contentType.music"
+                if_action: attach_discogs_content_by_search
+                else_action: unmatched
+            # Deezer search for music content:
+            - if_else:
+                condition: "flags.apis_enabled && flags.deezer_enabled && result.contentType == contentType.music"
+                if_action: attach_deezer_content_by_search
+                else_action: unmatched
             # OpenLibrary search for ebook/audiobook content:
             - if_else:
                 condition: "flags.apis_enabled && flags.openlibrary_enabled && result.contentType in [contentType.ebook, contentType.audiobook]"
@@ -412,6 +422,8 @@ flag_definitions:
   llm_enabled: bool
   porndb_enabled: bool
   stashdb_enabled: bool
+  discogs_enabled: bool
+  deezer_enabled: bool
   musicbrainz_enabled: bool
   openlibrary_enabled: bool
   comicvine_enabled: bool
@@ -428,6 +440,8 @@ flags:
   llm_enabled: false
   porndb_enabled: false
   stashdb_enabled: false
+  discogs_enabled: false
+  deezer_enabled: false
   musicbrainz_enabled: false
   openlibrary_enabled: false
   comicvine_enabled: false
