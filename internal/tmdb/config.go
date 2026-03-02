@@ -22,6 +22,6 @@ func NewDefaultConfig() Config {
 
 const (
 	defaultTmdbAPIKey     = "9c6689fa83ae6814fbfb200d70bba3a8"
-	defaultRateLimit      = time.Second / 20
-	defaultRateLimitBurst = 5
+	defaultRateLimit      = time.Second / 35 // TMDB allows ~40-50 req/s per IP.
+	defaultRateLimitBurst = 10
 )

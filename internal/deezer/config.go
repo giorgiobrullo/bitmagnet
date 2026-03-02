@@ -13,7 +13,7 @@ func NewDefaultConfig() Config {
 	return Config{
 		Enabled:        false,
 		BaseURL:        "https://api.deezer.com",
-		RateLimit:      200 * time.Millisecond, // ~50 req/5s.
-		RateLimitBurst: 5,
+		RateLimit:      125 * time.Millisecond, // Deezer allows 50 req/5s (10 req/s).
+		RateLimitBurst: 8,
 	}
 }

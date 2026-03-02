@@ -13,7 +13,7 @@ func NewDefaultConfig() Config {
 	return Config{
 		Enabled:        false,
 		BaseURL:        "https://openlibrary.org",
-		RateLimit:      time.Second,
-		RateLimitBurst: 1,
+		RateLimit:      334 * time.Millisecond, // OpenLibrary allows 3 req/s with User-Agent.
+		RateLimitBurst: 3,
 	}
 }
