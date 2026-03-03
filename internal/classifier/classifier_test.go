@@ -202,9 +202,29 @@ func TestClassifier(t *testing.T) {
 				Extension:   model.NewNullString("mkv"),
 				Size:        1000000000,
 			},
+			prepareMocks: func(mocks testClassifierMocks) {
+				mocks.search.On(
+					"ContentBySearch",
+					matchContext,
+					model.ContentTypeXxx,
+					"The XXX Movie",
+					model.Year(0),
+				).
+					Return(model.Content{}, classification.ErrUnmatched)
+				mocks.tmdbClient.On(
+					"SearchMovie",
+					matchContext,
+					tmdb.SearchMovieRequest{
+						Query:        "The XXX Movie",
+						IncludeAdult: true,
+					},
+				).
+					Return(tmdb.SearchMovieResponse{}, nil)
+			},
 			expected: classification.Result{
 				ContentAttributes: classification.ContentAttributes{
 					ContentType:     model.NewNullContentType(model.ContentTypeXxx),
+					BaseTitle:       model.NewNullString("The XXX Movie"),
 					VideoResolution: model.NewNullVideoResolution(model.VideoResolutionV1080p),
 				},
 			},

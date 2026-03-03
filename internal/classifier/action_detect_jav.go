@@ -28,6 +28,9 @@ var (
 	// Standard JAV codes at start of name (after optional bracket prefixes).
 	// Matches: SONE-436, ABP-907, MIDV-123, IPZZ-456, etc.
 	javCodeRegex = regexp.MustCompile(`(?i)^(?:\[.*?\]\s*)*([A-Z]{2,6})-(\d{3,5})\b`)
+	// Loose JAV code: preceded by common separator (space, @, ], ), 】).
+	// Catches codes after URL prefixes, site names, or CJK text.
+	javCodeLooseRegex = regexp.MustCompile(`(?i)[\s@\]\)】]([A-Z]{2,6})-(\d{3,5})\b`)
 	// Known non-JAV prefixes that look like JAV codes.
 	javExcludePrefixes = map[string]bool{
 		"WEB": true, "DTS": true, "AC3": true, "AAC": true, "AVC": true,
@@ -44,13 +47,19 @@ func ExtractJAVCode(name string) string {
 	if m := fc2Regex.FindStringSubmatch(name); m != nil {
 		return "FC2-PPV-" + m[1]
 	}
-	// Try standard JAV code.
+	// Try standard JAV code (anchored to start, most reliable).
 	if m := javCodeRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
-		if javExcludePrefixes[prefix] {
-			return ""
+		if !javExcludePrefixes[prefix] {
+			return prefix + "-" + m[2]
 		}
-		return prefix + "-" + m[2]
+	}
+	// Loose scan: JAV codes anywhere after common separators.
+	if m := javCodeLooseRegex.FindStringSubmatch(name); m != nil {
+		prefix := strings.ToUpper(m[1])
+		if !javExcludePrefixes[prefix] {
+			return prefix + "-" + m[2]
+		}
 	}
 	return ""
 }

@@ -22,7 +22,14 @@ func (c executionContext) porndbSearchScene(title string) (model.Content, error)
 		title,
 		searchResult.Data,
 		func(item porndb.SceneResult) []string {
-			return []string{item.Title}
+			candidates := []string{item.Title}
+			if item.Site != nil && item.Site.Name != "" {
+				candidates = append(candidates, item.Site.Name+" "+item.Title)
+			}
+			for _, p := range item.Performers {
+				candidates = append(candidates, p.Name+" "+item.Title)
+			}
+			return candidates
 		},
 	)
 

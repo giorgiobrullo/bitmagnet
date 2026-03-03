@@ -1,7 +1,9 @@
 package parsers
 
 import (
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/bitmagnet-io/bitmagnet/internal/classifier/classification"
 	"github.com/bitmagnet-io/bitmagnet/internal/keywords"
@@ -176,6 +178,94 @@ func ParseTitleYearEpisodes(
 	return "", 0, nil, "", classification.ErrUnmatched
 }
 
+// xxxBracketSuffixRegex strips bracketed suffixes from end of name.
+var xxxBracketSuffixRegex = regexp.MustCompile(`(?i)\s*(?:\[[^\]]*\]|\([^)]*\))\s*$`)
+
+// xxxFileExtRegex strips common video file extensions from end of name.
+var xxxFileExtRegex = regexp.MustCompile(`(?i)\.(mp4|mkv|wmv|avi|mov|flv|m4v|ts|webm)$`)
+
+// xxxTechTokens are quality/tech tokens stripped from the end of the name.
+var xxxTechTokens = map[string]bool{
+	"xxx": true, "1080p": true, "720p": true, "480p": true, "2160p": true,
+	"4k": true, "8k": true, "hevc": true, "x264": true, "x265": true,
+	"h264": true, "h265": true, "avc": true, "mp4": true, "mkv": true,
+	"wmv": true, "avi": true, "prt": true, "web": true, "hd": true,
+	"fhd": true, "uhd": true, "sdr": true, "hdr": true,
+}
+
+// xxxDateRegex detects dated scene patterns like "Studio 21 08 09 Scene Name".
+// Matches 3 consecutive 1-2 digit numbers separated by dots, spaces, or underscores.
+var xxxDateRegex = regexp.MustCompile(`^(.+?)[\s._](\d{1,2})[\s._](\d{1,2})[\s._](\d{1,2})[\s._](.+)$`)
+
+// parseXxxTitle extracts a meaningful title from xxx torrent names.
+// It strips tech tokens, release groups, and studio/date prefixes to produce
+// a clean title suitable for PornDB/StashDB API search.
+func parseXxxTitle(name string) string {
+	// 1. Strip bracketed suffixes from end.
+	for xxxBracketSuffixRegex.MatchString(name) {
+		name = xxxBracketSuffixRegex.ReplaceAllString(name, "")
+	}
+
+	// 2. Strip file extensions.
+	name = xxxFileExtRegex.ReplaceAllString(name, "")
+
+	// 3. Split into tokens and strip tech tokens from the end.
+	sep := "."
+	if strings.Contains(name, "_") && !strings.Contains(name, ".") {
+		sep = "_"
+	} else if strings.Contains(name, " ") && !strings.Contains(name, ".") {
+		sep = " "
+	}
+	tokens := strings.Split(name, sep)
+
+	// Strip tech tokens from end.
+	for len(tokens) > 0 {
+		last := strings.ToLower(strings.TrimSpace(tokens[len(tokens)-1]))
+		if last == "" || xxxTechTokens[last] {
+			tokens = tokens[:len(tokens)-1]
+		} else {
+			break
+		}
+	}
+
+	// 4. Strip release group suffix: final "-Word" token.
+	if len(tokens) > 0 {
+		lastToken := tokens[len(tokens)-1]
+		if idx := strings.LastIndex(lastToken, "-"); idx > 0 {
+			suffix := lastToken[idx+1:]
+			// Only strip if it looks like a release group (single word, no spaces).
+			if len(suffix) > 0 && !strings.Contains(suffix, " ") {
+				tokens[len(tokens)-1] = lastToken[:idx]
+				if strings.TrimSpace(tokens[len(tokens)-1]) == "" {
+					tokens = tokens[:len(tokens)-1]
+				}
+			}
+		}
+	}
+
+	// Rejoin with spaces.
+	name = strings.Join(tokens, " ")
+
+	// Replace remaining separators.
+	name = strings.ReplaceAll(name, ".", " ")
+	name = strings.ReplaceAll(name, "_", " ")
+
+	// 5. Try to detect dated scene pattern and extract only the part after the date.
+	if m := xxxDateRegex.FindStringSubmatch(name); m != nil {
+		n1, _ := strconv.Atoi(m[2])
+		n2, _ := strconv.Atoi(m[3])
+		n3, _ := strconv.Atoi(m[4])
+		// Check if it looks like a date: YY.MM.DD or DD.MM.YY
+		isDate := (n2 >= 1 && n2 <= 12 && n3 >= 1 && n3 <= 31) ||
+			(n1 >= 1 && n1 <= 31 && n2 >= 1 && n2 <= 12)
+		if isDate {
+			name = m[5]
+		}
+	}
+
+	return cleanTitle(strings.TrimSpace(name))
+}
+
 func ParseVideoContent(torrent model.Torrent, result classification.Result) (classification.ContentAttributes, error) {
 	name := SanitizeTorrentName(torrent.Name)
 	title, year, episodes, rest, err := ParseTitleYearEpisodes(result.ContentType, name)
@@ -202,8 +292,12 @@ func ParseVideoContent(torrent model.Torrent, result classification.Result) (cla
 		episodes = nil
 
 		if year.IsNil() {
-			title = ""
-			rest = torrent.Name
+			if ct.ContentType == model.ContentTypeXxx {
+				title = parseXxxTitle(name)
+			} else {
+				title = ""
+			}
+			rest = name
 		}
 	}
 

@@ -9,7 +9,13 @@ import (
 const levenshteinThreshold = 5
 
 func levenshteinFindBestMatch[T any](target string, items []T, getCandidates func(T) []string) (t T, ok bool) {
-	minDistance := levenshteinThreshold + 1
+	normTarget := levenshteinNormalizeString(target)
+	threshold := levenshteinThreshold
+	if scaled := len(normTarget) / 5; scaled > threshold {
+		threshold = scaled
+	}
+
+	minDistance := threshold + 1
 	bestMatch := -1
 
 	for i, item := range items {
