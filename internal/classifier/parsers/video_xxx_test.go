@@ -122,6 +122,27 @@ func TestParseXxxTitle(t *testing.T) {
 			input:    "SugarBabesTV.21.05.06.Julia.I.Like.Kinky.Boys.iNTERNAL.XXX.2160p.MP4-LUST",
 			expected: "SugarBabesTV Julia I Like Kinky Boys",
 		},
+		// === Language tags and VR tokens stripped ===
+		{
+			name:     "JAPANESE language tag stripped",
+			input:    "TripForFuck.23.05.05.Mirei.JAPANESE.XXX.1080p.MP4-WRB[XC]",
+			expected: "TripForFuck Mirei",
+		},
+		{
+			name:     "VR180 and high-res VR stripped",
+			input:    "StasyQVR.20.02.10.Mary.Q.Young.Goddess.XXX.VR180.2700p.MP4-GUSH[rarbg]",
+			expected: "StasyQVR Mary Q Young Goddess",
+		},
+		{
+			name:     "HR quality token stripped",
+			input:    "Paintoy.14.09.24.Emma.XXX.HR.MP4-YAPG[rarbg]",
+			expected: "Paintoy Emma",
+		},
+		{
+			name:     "WEBRip and x264 stripped with release group",
+			input:    "AltErotic.17.01.20.Kitten.Wants.To.Have.A.Tattoo.On.Half.Of.Her.Face.XXX.720p.HD.WEBRip.x264-TGxXX[XvX]",
+			expected: "AltErotic Kitten Wants To Have A Tattoo On Half Of Her Face",
+		},
 		// === Non-dated xxx titles: should return full cleaned title ===
 		{
 			name:     "simple xxx title no date",

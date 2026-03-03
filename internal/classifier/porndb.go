@@ -36,9 +36,12 @@ func (c executionContext) porndbSearchScene(title string) (model.Content, error)
 					candidates = append(candidates, item.Site.Name+" "+p.Name)
 				}
 			}
-			// Site + all performers + title: matches "Studio Performer1 Performer2 Scene Title" queries.
+			// Site + all performers: matches "Studio Performer1 Performer2" queries
+			// where the torrent name has no scene title after the performers.
 			if item.Site != nil && item.Site.Name != "" && len(performerNames) > 0 {
-				candidates = append(candidates, item.Site.Name+" "+strings.Join(performerNames, " ")+" "+item.Title)
+				allPerfs := strings.Join(performerNames, " ")
+				candidates = append(candidates, item.Site.Name+" "+allPerfs)
+				candidates = append(candidates, item.Site.Name+" "+allPerfs+" "+item.Title)
 			}
 			return candidates
 		},

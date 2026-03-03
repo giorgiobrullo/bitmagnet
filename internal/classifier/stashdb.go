@@ -36,9 +36,12 @@ func (c executionContext) stashdbSearchScene(title string) (model.Content, error
 					candidates = append(candidates, item.Studio.Name+" "+p.Performer.Name)
 				}
 			}
-			// Studio + all performers + title: matches "Studio Performer1 Performer2 Scene Title" queries.
+			// Studio + all performers: matches "Studio Performer1 Performer2" queries
+			// where the torrent name has no scene title after the performers.
 			if item.Studio != nil && item.Studio.Name != "" && len(performerNames) > 0 {
-				candidates = append(candidates, item.Studio.Name+" "+strings.Join(performerNames, " ")+" "+item.Title)
+				allPerfs := strings.Join(performerNames, " ")
+				candidates = append(candidates, item.Studio.Name+" "+allPerfs)
+				candidates = append(candidates, item.Studio.Name+" "+allPerfs+" "+item.Title)
 			}
 			return candidates
 		},

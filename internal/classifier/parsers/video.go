@@ -191,7 +191,11 @@ var xxxTechTokens = map[string]bool{
 	"h264": true, "h265": true, "avc": true, "mp4": true, "mkv": true,
 	"wmv": true, "avi": true, "prt": true, "web": true, "hd": true,
 	"fhd": true, "uhd": true, "sdr": true, "hdr": true, "sd": true,
-	"internal": true,
+	"hr": true, "internal": true, "webrip": true,
+	// VR tokens.
+	"vr": true, "vr180": true, "vr360": true, "3dh": true, "lr": true,
+	// Language tags that leak into scene names.
+	"japanese": true, "english": true, "chinese": true,
 }
 
 // xxxReleaseGroupRegex matches common release group tags (all uppercase, 2-10 chars).
@@ -204,6 +208,9 @@ var xxxKnownReleaseGroups = map[string]bool{
 	"fetish": true, "vsex": true, "lewd": true, "galaxxxy": true,
 	"ohrly": true, "lust": true,
 }
+
+// xxxResolutionRegex matches resolution tokens like 2700p, 3600p, 5400p (VR resolutions).
+var xxxResolutionRegex = regexp.MustCompile(`(?i)^\d{3,4}p$`)
 
 // xxxDateRegex detects dated scene patterns like "Studio 21 08 09 Scene Name".
 // Matches 3 consecutive 1-2 digit numbers separated by dots, spaces, or underscores.
@@ -277,7 +284,7 @@ func parseXxxTitle(name string) string {
 			sceneParts := strings.Fields(m[5])
 			for len(sceneParts) > 0 {
 				last := strings.ToLower(sceneParts[len(sceneParts)-1])
-				if xxxTechTokens[last] || xxxKnownReleaseGroups[last] {
+				if xxxTechTokens[last] || xxxKnownReleaseGroups[last] || xxxResolutionRegex.MatchString(last) {
 					sceneParts = sceneParts[:len(sceneParts)-1]
 				} else {
 					break
