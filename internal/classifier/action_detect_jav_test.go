@@ -61,6 +61,8 @@ func TestExtractJAVCode(t *testing.T) {
 		{name: "carib keyword shorthand", input: "carib-042415-860", expected: "042415-860"},
 		{name: "h0930 context keyword", input: "h0930 ori1234 011215_35", expected: "011215_35"},
 		{name: "paco shorthand keyword", input: "091217_144-paco-1080p Nanako Shiraishi (32).mp4", expected: "091217_144"},
+		{name: "10mu shorthand keyword", input: "061025_01-10mu", expected: "061025_01"},
+		{name: "1pondo CJK keyword", input: "071213_625 一本道 美好的旅行", expected: "071213_625"},
 
 		// === Numeric codes WITHOUT context keywords → should NOT match ===
 		{name: "no context no match", input: "Random 042415-860 Video", expected: ""},
