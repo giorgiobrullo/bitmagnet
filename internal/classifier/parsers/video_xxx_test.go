@@ -143,6 +143,37 @@ func TestParseXxxTitle(t *testing.T) {
 			input:    "AltErotic.17.01.20.Kitten.Wants.To.Have.A.Tattoo.On.Half.Of.Her.Face.XXX.720p.HD.WEBRip.x264-TGxXX[XvX]",
 			expected: "AltErotic Kitten Wants To Have A Tattoo On Half Of Her Face",
 		},
+		// === Dash-separated format with parenthesized date ===
+		{
+			name:     "Brazzers dash-separated with parenthesized date",
+			input:    "Brazzers - Demi Hawks, Emma Rosie - Hot & Mean Anal Tease (18.11.2025) rq.mp4",
+			expected: "Brazzers Demi Hawks Emma Rosie Hot & Mean Anal Tease",
+		},
+		{
+			name:     "MyPervyFamily dash-separated",
+			input:    "MyPervyFamily - Scarlett Alexis - The Solution... You Be My Fuck Buddy (18.11.2023) rq.mp4",
+			expected: "MyPervyFamily Scarlett Alexis The Solution... You Be My Fuck Buddy",
+		},
+		{
+			name:     "WakeUpNFuck dash-separated",
+			input:    "WakeUpNFuck - Amhyra Shy - WUNF 427 (10.09.2025) rq.mp4",
+			expected: "WakeUpNFuck Amhyra Shy WUNF 427",
+		},
+		{
+			name:     "MomIsHorny dash-separated",
+			input:    "MomIsHorny - Aderes Quin - BIG Extra Credit (22.08.2025) rq.mp4",
+			expected: "MomIsHorny Aderes Quin BIG Extra Credit",
+		},
+		{
+			name:     "dash-separated with _1080p quality suffix",
+			input:    "Aylla Mel - Aylla Mell - Creamy-Anal Babe Rides A Big Cock (17.11.2025)_1080p.mp4",
+			expected: "Aylla Mel Aylla Mell Creamy-Anal Babe Rides A Big Cock",
+		},
+		{
+			name:     "MomWantsCreampie dash-separated",
+			input:    "MomWantsCreampie - Rachael Cavalli - I Need A Younger Man To Breed Me (31.12.2025) rq.mp4",
+			expected: "MomWantsCreampie Rachael Cavalli I Need A Younger Man To Breed Me",
+		},
 		// === Non-dated xxx titles: should return full cleaned title ===
 		{
 			name:     "simple xxx title no date",

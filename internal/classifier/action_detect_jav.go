@@ -46,7 +46,7 @@ var (
 	javNumericHyphenRegex     = regexp.MustCompile(`(?:^|[^0-9])(\d{6})-(\d{2,3})(?:[^0-9]|$)`)
 	javNumericUnderscoreRegex = regexp.MustCompile(`(?:^|[^0-9])(\d{6})_(\d{2,3})(?:[^0-9]|$)`)
 	// Context keywords that indicate an uncensored JAV provider using numeric codes.
-	javNumericContextKeywords = regexp.MustCompile(`(?i)(?:caribbean|caribbeancom|1pondo|1pon|10musume|muramura|pacopacomama|h0930|c0930|h4610|carib)`)
+	javNumericContextKeywords = regexp.MustCompile(`(?i)(?:caribbean|caribbeancom|1pondo|1pon|10musume|muramura|pacopacomama|paco|h0930|c0930|h4610|carib)`)
 	// Known non-JAV prefixes that look like JAV codes.
 	javExcludePrefixes = map[string]bool{
 		"WEB": true, "DTS": true, "AC3": true, "AAC": true, "AVC": true,

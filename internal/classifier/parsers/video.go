@@ -216,6 +216,13 @@ var xxxResolutionRegex = regexp.MustCompile(`(?i)^\d{3,4}p$`)
 // Matches 3 consecutive 1-2 digit numbers separated by dots, spaces, or underscores.
 var xxxDateRegex = regexp.MustCompile(`^(.+?)[\s._](\d{1,2})[\s._](\d{1,2})[\s._](\d{1,2})[\s._](.+)$`)
 
+// xxxParenDateRegex detects dash-separated scenes with parenthesized dates:
+// "Studio - Performer - Title (DD.MM.YYYY) rq.mp4"
+var xxxParenDateRegex = regexp.MustCompile(`^(.+?)\s*\(\d{2}\.\d{2}\.\d{4}\).*$`)
+
+// xxxQualitySuffixRegex strips trailing quality markers from dash-separated format.
+var xxxQualitySuffixRegex = regexp.MustCompile(`(?i)\s+(?:rq|hq|lq)$`)
+
 // parseXxxTitle extracts a meaningful title from xxx torrent names.
 // It strips tech tokens, release groups, and studio/date prefixes to produce
 // a clean title suitable for PornDB/StashDB API search.
@@ -227,6 +234,16 @@ func parseXxxTitle(name string) string {
 
 	// 2. Strip file extensions.
 	name = xxxFileExtRegex.ReplaceAllString(name, "")
+
+	// 2b. Try dash-separated format with parenthesized date:
+	// "Studio - Performer - Title (DD.MM.YYYY) rq" → "Studio Performer Title"
+	if m := xxxParenDateRegex.FindStringSubmatch(name); m != nil {
+		title := strings.TrimSpace(m[1])
+		title = strings.ReplaceAll(title, " - ", " ")
+		title = strings.ReplaceAll(title, ", ", " ")
+		title = xxxQualitySuffixRegex.ReplaceAllString(title, "")
+		return strings.TrimSpace(title)
+	}
 
 	// 3. Split into tokens and strip tech tokens from the end.
 	sep := "."
