@@ -101,6 +101,27 @@ func TestParseXxxTitle(t *testing.T) {
 			input:    "brattysis.17.12.15.sydney.cole.fucking.my.step.sister.mp4",
 			expected: "brattysis sydney cole fucking my step sister",
 		},
+		// === Dot-separated release groups and "SD" tech token ===
+		{
+			name:     "dot-separated release group KTR",
+			input:    "BigTitsRoundAsses.14.05.01.Ava.Addams.XXX.1080p.MP4.KTR",
+			expected: "BigTitsRoundAsses Ava Addams",
+		},
+		{
+			name:     "SD quality token stripped",
+			input:    "Blacked.18.08.23.Izzy.Lush.XXX.SD.MP4-KLEENEX",
+			expected: "Blacked Izzy Lush",
+		},
+		{
+			name:     "release group OHRLY",
+			input:    "SilviaSaint.13.04.07.Casting.59.Caren.BTS.XXX.1080p.MP4-OHRLY[rarbg]",
+			expected: "SilviaSaint Casting 59 Caren BTS",
+		},
+		{
+			name:     "INTERNAL token stripped",
+			input:    "SugarBabesTV.21.05.06.Julia.I.Like.Kinky.Boys.iNTERNAL.XXX.2160p.MP4-LUST",
+			expected: "SugarBabesTV Julia I Like Kinky Boys",
+		},
 		// === Non-dated xxx titles: should return full cleaned title ===
 		{
 			name:     "simple xxx title no date",

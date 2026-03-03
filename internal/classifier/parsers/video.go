@@ -190,7 +190,19 @@ var xxxTechTokens = map[string]bool{
 	"4k": true, "8k": true, "hevc": true, "x264": true, "x265": true,
 	"h264": true, "h265": true, "avc": true, "mp4": true, "mkv": true,
 	"wmv": true, "avi": true, "prt": true, "web": true, "hd": true,
-	"fhd": true, "uhd": true, "sdr": true, "hdr": true,
+	"fhd": true, "uhd": true, "sdr": true, "hdr": true, "sd": true,
+	"internal": true,
+}
+
+// xxxReleaseGroupRegex matches common release group tags (all uppercase, 2-10 chars).
+var xxxReleaseGroupRegex = regexp.MustCompile(`^[A-Za-z]{2,10}$`)
+
+// xxxKnownReleaseGroups are scene release groups frequently seen as dot-separated tokens.
+var xxxKnownReleaseGroups = map[string]bool{
+	"ktr": true, "wrb": true, "nbq": true, "xvx": true, "xc": true,
+	"prt": true, "rarbg": true, "prime": true, "kleenex": true,
+	"fetish": true, "vsex": true, "lewd": true, "galaxxxy": true,
+	"ohrly": true, "lust": true,
 }
 
 // xxxDateRegex detects dated scene patterns like "Studio 21 08 09 Scene Name".
@@ -259,13 +271,13 @@ func parseXxxTitle(name string) string {
 		isDate := (n2 >= 1 && n2 <= 12 && n3 >= 1 && n3 <= 31) ||
 			(n1 >= 1 && n1 <= 31 && n2 >= 1 && n2 <= 12)
 		if isDate {
-			// Strip tech tokens from the scene name portion after the date,
-			// since the main tech-stripping loop (step 3) ran before date detection
-			// and couldn't strip tokens like "XXX 1080p MP4" that follow the scene name.
+			// Strip tech tokens and release groups from the scene name portion after
+			// the date, since the main tech-stripping loop (step 3) ran before date
+			// detection and couldn't strip tokens that follow the scene name.
 			sceneParts := strings.Fields(m[5])
 			for len(sceneParts) > 0 {
 				last := strings.ToLower(sceneParts[len(sceneParts)-1])
-				if xxxTechTokens[last] {
+				if xxxTechTokens[last] || xxxKnownReleaseGroups[last] {
 					sceneParts = sceneParts[:len(sceneParts)-1]
 				} else {
 					break

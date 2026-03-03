@@ -1,6 +1,8 @@
 package classifier
 
 import (
+	"strings"
+
 	"github.com/bitmagnet-io/bitmagnet/internal/classifier/classification"
 	"github.com/bitmagnet-io/bitmagnet/internal/model"
 	"github.com/bitmagnet-io/bitmagnet/internal/stashdb"
@@ -26,11 +28,17 @@ func (c executionContext) stashdbSearchScene(title string) (model.Content, error
 			if item.Studio != nil && item.Studio.Name != "" {
 				candidates = append(candidates, item.Studio.Name+" "+item.Title)
 			}
+			var performerNames []string
 			for _, p := range item.Performers {
+				performerNames = append(performerNames, p.Performer.Name)
 				candidates = append(candidates, p.Performer.Name+" "+item.Title)
 				if item.Studio != nil && item.Studio.Name != "" {
 					candidates = append(candidates, item.Studio.Name+" "+p.Performer.Name)
 				}
+			}
+			// Studio + all performers + title: matches "Studio Performer1 Performer2 Scene Title" queries.
+			if item.Studio != nil && item.Studio.Name != "" && len(performerNames) > 0 {
+				candidates = append(candidates, item.Studio.Name+" "+strings.Join(performerNames, " ")+" "+item.Title)
 			}
 			return candidates
 		},
