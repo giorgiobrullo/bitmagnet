@@ -28,6 +28,9 @@ func (c executionContext) stashdbSearchScene(title string) (model.Content, error
 			}
 			for _, p := range item.Performers {
 				candidates = append(candidates, p.Performer.Name+" "+item.Title)
+				if item.Studio != nil && item.Studio.Name != "" {
+					candidates = append(candidates, item.Studio.Name+" "+p.Performer.Name)
+				}
 			}
 			return candidates
 		},

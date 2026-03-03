@@ -28,6 +28,9 @@ func (c executionContext) porndbSearchScene(title string) (model.Content, error)
 			}
 			for _, p := range item.Performers {
 				candidates = append(candidates, p.Name+" "+item.Title)
+				if item.Site != nil && item.Site.Name != "" {
+					candidates = append(candidates, item.Site.Name+" "+p.Name)
+				}
 			}
 			return candidates
 		},

@@ -2,6 +2,7 @@ package classifier
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bitmagnet-io/bitmagnet/internal/classifier/classification"
@@ -40,6 +41,12 @@ var (
 	javCodeLooseRegex = regexp.MustCompile(`(?i)[^a-zA-Z]([A-Z]{2,6})-(\d{3,5})(?:[^0-9]|$)`)
 	// Number-prefix JAV codes (MGS/amateur format): 390JNT-112, 259LUXU-1234, etc.
 	javCodeNumPrefixRegex = regexp.MustCompile(`(?i)(?:^|[^0-9])(\d{3,4})([A-Z]{2,5})-(\d{3,5})(?:[^0-9]|$)`)
+	// Numeric JAV codes: MMDDYY-NNN (Caribbeancom) or MMDDYY_NNN (1Pondo/10Musume/Pacopacomama).
+	// Only matched when context keywords are present to avoid false positives.
+	javNumericHyphenRegex     = regexp.MustCompile(`(?:^|[^0-9])(\d{6})-(\d{2,3})(?:[^0-9]|$)`)
+	javNumericUnderscoreRegex = regexp.MustCompile(`(?:^|[^0-9])(\d{6})_(\d{2,3})(?:[^0-9]|$)`)
+	// Context keywords that indicate an uncensored JAV provider using numeric codes.
+	javNumericContextKeywords = regexp.MustCompile(`(?i)(?:caribbean|caribbeancom|1pondo|1pon|10musume|muramura|pacopacomama|h0930|c0930|h4610|carib)`)
 	// Known non-JAV prefixes that look like JAV codes.
 	javExcludePrefixes = map[string]bool{
 		"WEB": true, "DTS": true, "AC3": true, "AAC": true, "AVC": true,
@@ -48,6 +55,16 @@ var (
 		"ZIP": true, "TAR": true, "H26": true, "X26": true, "HEV": true,
 	}
 )
+
+// isValidMMDDYY checks if a 6-digit string represents a plausible MMDDYY date.
+func isValidMMDDYY(s string) bool {
+	if len(s) != 6 {
+		return false
+	}
+	mm, _ := strconv.Atoi(s[0:2])
+	dd, _ := strconv.Atoi(s[2:4])
+	return mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31
+}
 
 // ExtractJAVCode tries to extract a JAV code from a torrent name.
 // Returns the normalized code (e.g., "SONE-436", "FC2-PPV-4496995") or empty string.
@@ -75,6 +92,19 @@ func ExtractJAVCode(name string) string {
 		prefix := strings.ToUpper(m[2])
 		if !javExcludePrefixes[prefix] {
 			return m[1] + prefix + "-" + m[3]
+		}
+	}
+	// Numeric JAV codes (Caribbeancom/1Pondo family): require context keywords.
+	if javNumericContextKeywords.MatchString(name) {
+		if m := javNumericHyphenRegex.FindStringSubmatch(name); m != nil {
+			if isValidMMDDYY(m[1]) {
+				return m[1] + "-" + m[2]
+			}
+		}
+		if m := javNumericUnderscoreRegex.FindStringSubmatch(name); m != nil {
+			if isValidMMDDYY(m[1]) {
+				return m[1] + "_" + m[2]
+			}
 		}
 	}
 	// Loose scan: JAV codes anywhere after non-letter characters.

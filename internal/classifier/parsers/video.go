@@ -259,7 +259,7 @@ func parseXxxTitle(name string) string {
 		isDate := (n2 >= 1 && n2 <= 12 && n3 >= 1 && n3 <= 31) ||
 			(n1 >= 1 && n1 <= 31 && n2 >= 1 && n2 <= 12)
 		if isDate {
-			name = m[5]
+			name = strings.TrimSpace(m[1]) + " " + strings.TrimSpace(m[5])
 		}
 	}
 
