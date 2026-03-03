@@ -35,6 +35,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/igdb/igdbfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan/jikanfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/llm/llmfx"
+	"github.com/bitmagnet-io/bitmagnet/internal/metatube/metatubefx"
 	"github.com/bitmagnet-io/bitmagnet/internal/musicbrainz/musicbrainzfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/openlibrary/openlibraryfx"
 	"github.com/bitmagnet-io/bitmagnet/internal/porndb/porndbfx"
@@ -76,6 +77,7 @@ func New() fx.Option {
 		igdbfx.New(),
 		jikanfx.New(),
 		llmfx.New(),
+		metatubefx.New(),
 		musicbrainzfx.New(),
 		openlibraryfx.New(),
 		porndbfx.New(),

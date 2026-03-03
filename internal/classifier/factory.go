@@ -13,6 +13,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan"
 	"github.com/bitmagnet-io/bitmagnet/internal/lazy"
 	"github.com/bitmagnet-io/bitmagnet/internal/llm"
+	"github.com/bitmagnet-io/bitmagnet/internal/metatube"
 	"github.com/bitmagnet-io/bitmagnet/internal/musicbrainz"
 	"github.com/bitmagnet-io/bitmagnet/internal/openlibrary"
 	"github.com/bitmagnet-io/bitmagnet/internal/porndb"
@@ -38,6 +39,7 @@ type Params struct {
 	AnilistConfig      anilist.Config
 	JikanConfig        jikan.Config
 	GooglebooksConfig  googlebooks.Config
+	MetatubeConfig     metatube.Config
 	Search             lazy.Lazy[search.Search]
 	TmdbClient         lazy.Lazy[tmdb.Client]
 	LlmClient          lazy.Lazy[llm.Client]
@@ -52,6 +54,7 @@ type Params struct {
 	AnilistClient      lazy.Lazy[anilist.Client]
 	JikanClient        lazy.Lazy[jikan.Client]
 	GooglebooksClient  lazy.Lazy[googlebooks.Client]
+	MetatubeClient     lazy.Lazy[metatube.Client]
 	Logger             *zap.SugaredLogger
 }
 
@@ -170,6 +173,14 @@ func New(params Params) Result {
 			}
 		}
 
+		// MetaTube client is optional — gracefully nil if disabled or errored.
+		var metatubeClient metatube.Client
+		if params.MetatubeConfig.Enabled {
+			if c, mtErr := params.MetatubeClient.Get(); mtErr == nil {
+				metatubeClient = c
+			}
+		}
+
 		logger := zap.NewNop().Sugar()
 		verbose := params.Config.Verbose
 		if verbose == true {
@@ -200,13 +211,14 @@ func New(params Params) Result {
 				anilistClient:      anilistClient,
 				jikanClient:        jikanClient,
 				googlebooksClient:  googlebooksClient,
+				metatubeClient:     metatubeClient,
 				_logger:            logger,
 				logger:             logger,
 			},
 		}, nil
 	})
 	lsrc := lazy.New[Source](func() (Source, error) {
-		src, err := newSourceProvider(params.Config, params.TmdbConfig, params.LlmConfig.Enabled, params.PorndbConfig.Enabled, params.StashdbConfig.Enabled, params.DiscogsConfig.Enabled, params.DeezerConfig.Enabled, params.MusicbrainzConfig.Enabled, params.OpenlibraryConfig.Enabled, params.ComicvineConfig.Enabled, params.IgdbConfig.Enabled, params.AnilistConfig.Enabled, params.JikanConfig.Enabled, params.GooglebooksConfig.Enabled).source()
+		src, err := newSourceProvider(params.Config, params.TmdbConfig, params.LlmConfig.Enabled, params.PorndbConfig.Enabled, params.StashdbConfig.Enabled, params.DiscogsConfig.Enabled, params.DeezerConfig.Enabled, params.MusicbrainzConfig.Enabled, params.OpenlibraryConfig.Enabled, params.ComicvineConfig.Enabled, params.IgdbConfig.Enabled, params.AnilistConfig.Enabled, params.JikanConfig.Enabled, params.GooglebooksConfig.Enabled, params.MetatubeConfig.Enabled).source()
 		if err != nil {
 			return Source{}, err
 		}

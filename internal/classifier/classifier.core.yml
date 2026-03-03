@@ -130,6 +130,11 @@ workflows:
                 condition: "flags.apis_enabled && flags.porndb_enabled && result.contentType == contentType.xxx"
                 if_action: attach_porndb_jav_by_search
                 else_action: unmatched
+            # MetaTube JAV search for xxx content (30+ JAV sources: FANZA, JavBus, etc.):
+            - if_else:
+                condition: "flags.apis_enabled && flags.metatube_enabled && result.contentType == contentType.xxx"
+                if_action: attach_metatube_jav_by_search
+                else_action: unmatched
             # PornDB search for xxx content:
             - if_else:
                 condition: "flags.apis_enabled && flags.porndb_enabled && result.contentType == contentType.xxx"
@@ -440,6 +445,7 @@ flag_definitions:
   anilist_enabled: bool
   jikan_enabled: bool
   googlebooks_enabled: bool
+  metatube_enabled: bool
   delete_content_types: content_type_list
   delete_xxx: bool
 flags:
@@ -458,5 +464,6 @@ flags:
   anilist_enabled: false
   jikan_enabled: false
   googlebooks_enabled: false
+  metatube_enabled: false
   delete_content_types: []
   delete_xxx: false

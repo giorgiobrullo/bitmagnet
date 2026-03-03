@@ -45,6 +45,7 @@ var defaultFeatures = newFeatures(
 		attachGooglebooksContentBySearchAction{},
 		attachIgdbContentBySearchAction{},
 		attachJikanContentBySearchAction{},
+		attachMetatubeJAVBySearchAction{},
 		attachMusicbrainzContentBySearchAction{},
 		attachOpenlibraryContentBySearchAction{},
 		attachPorndbContentBySearchAction{},

@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, porndbEnabled bool, stashdbEnabled bool, discogsEnabled bool, deezerEnabled bool, musicbrainzEnabled bool, openlibraryEnabled bool, comicvineEnabled bool, igdbEnabled bool, anilistEnabled bool, jikanEnabled bool, googlebooksEnabled bool) sourceProvider {
+func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, porndbEnabled bool, stashdbEnabled bool, discogsEnabled bool, deezerEnabled bool, musicbrainzEnabled bool, openlibraryEnabled bool, comicvineEnabled bool, igdbEnabled bool, anilistEnabled bool, jikanEnabled bool, googlebooksEnabled bool, metatubeEnabled bool) sourceProvider {
 	var providers []sourceProvider
 	providers = append(providers, coreSourceProvider{}.provider())
 	providers = append(providers, xdgSourceProvider{}.providers()...)
@@ -31,6 +31,7 @@ func newSourceProvider(config Config, tmdbConfig tmdb.Config, llmEnabled bool, p
 		anilistEnabled:      anilistEnabled,
 		jikanEnabled:        jikanEnabled,
 		googlebooksEnabled:  googlebooksEnabled,
+		metatubeEnabled:     metatubeEnabled,
 	})
 
 	return mergeSourceProvider{providers: providers}
@@ -175,6 +176,7 @@ type configSourceProvider struct {
 	anilistEnabled     bool
 	jikanEnabled       bool
 	googlebooksEnabled bool
+	metatubeEnabled    bool
 }
 
 func (c configSourceProvider) source() (Source, error) {
@@ -200,6 +202,7 @@ func (c configSourceProvider) source() (Source, error) {
 	fs["anilist_enabled"] = c.anilistEnabled
 	fs["jikan_enabled"] = c.jikanEnabled
 	fs["googlebooks_enabled"] = c.googlebooksEnabled
+	fs["metatube_enabled"] = c.metatubeEnabled
 
 	return Source{
 		Keywords:           c.config.Keywords,

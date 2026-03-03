@@ -12,6 +12,7 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/igdb"
 	"github.com/bitmagnet-io/bitmagnet/internal/jikan"
 	"github.com/bitmagnet-io/bitmagnet/internal/llm"
+	"github.com/bitmagnet-io/bitmagnet/internal/metatube"
 	"github.com/bitmagnet-io/bitmagnet/internal/model"
 	"github.com/bitmagnet-io/bitmagnet/internal/musicbrainz"
 	"github.com/bitmagnet-io/bitmagnet/internal/openlibrary"
@@ -37,6 +38,7 @@ type dependencies struct {
 	anilistClient      anilist.Client
 	jikanClient        jikan.Client
 	googlebooksClient  googlebooks.Client
+	metatubeClient     metatube.Client
 	_logger            *zap.SugaredLogger
 	logger            *zap.SugaredLogger
 }
