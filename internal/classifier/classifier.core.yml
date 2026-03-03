@@ -64,11 +64,13 @@ workflows:
                   set_content_type: software
                 else_action: unmatched
             # match xxx:
+            # Only check torrent base name (not file paths) to avoid false positives
+            # where a single episode title in a TV season pack matches an xxx keyword.
             - if_else:
                 condition:
                   and:
                     - "torrent.files.map(f, (f.extension in extensions.video || f.extension in extensions.image) ? f.size : - f.size).sum() > 0"
-                    - "([torrent.baseName] + torrent.files.map(f, f.basePath)).join(' ').matches(keywords.xxx)"
+                    - "torrent.baseName.matches(keywords.xxx)"
                 if_action:
                   set_content_type: xxx
                 else_action: unmatched

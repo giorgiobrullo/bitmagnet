@@ -22,15 +22,24 @@ var detectJAVPayloadSpec = payloadLiteral[string]{
 }
 
 // JAV code patterns.
+//
+// Note: Go's \b treats _ as a word character, so PRED-797_FHD wouldn't match
+// with \b after the digits. We use (?:[^0-9]|$) instead to ensure the digit
+// sequence terminates without consuming the separator.
 var (
 	// FC2-PPV codes (very specific, match anywhere).
-	fc2Regex = regexp.MustCompile(`(?i)\bFC2[-_]?PPV[-_]?(\d{4,7})\b`)
+	fc2Regex = regexp.MustCompile(`(?i)\bFC2[-_]?PPV[-_]?(\d{4,7})(?:[^0-9]|$)`)
 	// Standard JAV codes at start of name (after optional bracket prefixes).
-	// Matches: SONE-436, ABP-907, MIDV-123, IPZZ-456, etc.
-	javCodeRegex = regexp.MustCompile(`(?i)^(?:\[.*?\]\s*)*([A-Z]{2,6})-(\d{3,5})\b`)
-	// Loose JAV code: preceded by common separator (space, @, ], ), 】).
-	// Catches codes after URL prefixes, site names, or CJK text.
-	javCodeLooseRegex = regexp.MustCompile(`(?i)[\s@\]\)】]([A-Z]{2,6})-(\d{3,5})\b`)
+	// Matches: SONE-436, ABP-907, MIDV-123, PRED-797_FHD, etc.
+	javCodeRegex = regexp.MustCompile(`(?i)^(?:\[.*?\]\s*)*([A-Z]{2,6})-(\d{3,5})(?:[^0-9]|$)`)
+	// Standard JAV codes without hyphen at start of name.
+	// Matches: HND573, DTRS019, MADV270, etc.
+	javCodeNoHyphenRegex = regexp.MustCompile(`(?i)^(?:\[.*?\]\s*)*([A-Z]{2,6})(\d{3,5})(?:[^0-9a-zA-Z]|$)`)
+	// Loose JAV code: preceded by any non-ASCII-letter character.
+	// Catches codes after URL prefixes, site names, CJK text, parens, etc.
+	javCodeLooseRegex = regexp.MustCompile(`(?i)[^a-zA-Z]([A-Z]{2,6})-(\d{3,5})(?:[^0-9]|$)`)
+	// Number-prefix JAV codes (MGS/amateur format): 390JNT-112, 259LUXU-1234, etc.
+	javCodeNumPrefixRegex = regexp.MustCompile(`(?i)(?:^|[^0-9])(\d{3,4})([A-Z]{2,5})-(\d{3,5})(?:[^0-9]|$)`)
 	// Known non-JAV prefixes that look like JAV codes.
 	javExcludePrefixes = map[string]bool{
 		"WEB": true, "DTS": true, "AC3": true, "AAC": true, "AVC": true,
@@ -47,14 +56,28 @@ func ExtractJAVCode(name string) string {
 	if m := fc2Regex.FindStringSubmatch(name); m != nil {
 		return "FC2-PPV-" + m[1]
 	}
-	// Try standard JAV code (anchored to start, most reliable).
+	// Try standard JAV code at start (most reliable).
 	if m := javCodeRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
 		if !javExcludePrefixes[prefix] {
 			return prefix + "-" + m[2]
 		}
 	}
-	// Loose scan: JAV codes anywhere after common separators.
+	// Try non-hyphenated JAV code at start: HND573, DTRS019, etc.
+	if m := javCodeNoHyphenRegex.FindStringSubmatch(name); m != nil {
+		prefix := strings.ToUpper(m[1])
+		if !javExcludePrefixes[prefix] {
+			return prefix + "-" + m[2]
+		}
+	}
+	// Number-prefix JAV codes: 390JNT-112, 259LUXU-1234, etc.
+	if m := javCodeNumPrefixRegex.FindStringSubmatch(name); m != nil {
+		prefix := strings.ToUpper(m[2])
+		if !javExcludePrefixes[prefix] {
+			return m[1] + prefix + "-" + m[3]
+		}
+	}
+	// Loose scan: JAV codes anywhere after non-letter characters.
 	if m := javCodeLooseRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
 		if !javExcludePrefixes[prefix] {
