@@ -3,6 +3,7 @@ package anilist
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
 	"time"
 
@@ -44,14 +45,30 @@ func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 		SetBaseURL(config.BaseURL).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json").
-		SetRetryCount(2).
+		SetRetryCount(3).
 		SetRetryWaitTime(2 * time.Second).
-		SetRetryMaxWaitTime(10 * time.Second).
+		SetRetryMaxWaitTime(65 * time.Second).
 		SetTimeout(15 * time.Second).
 		EnableTrace()
 
 	c.AddRetryCondition(func(r *resty.Response, err error) bool {
 		return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)
+	})
+
+	// Respect AniList's Retry-After header on 429 responses.
+	c.SetRetryAfter(func(_ *resty.Client, resp *resty.Response) (time.Duration, error) {
+		if resp.StatusCode() == 429 {
+			if ra := resp.Header().Get("Retry-After"); ra != "" {
+				if secs, err := strconv.Atoi(ra); err == nil {
+					logger.Infof("AniList rate limited, waiting %ds (Retry-After)", secs)
+					return time.Duration(secs) * time.Second, nil
+				}
+			}
+			// No header or unparseable — default to 60s (AniList's cooldown).
+			logger.Info("AniList rate limited, waiting 60s (default cooldown)")
+			return 60 * time.Second, nil
+		}
+		return 0, nil
 	})
 
 	return requesterLogger{

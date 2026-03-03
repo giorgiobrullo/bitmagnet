@@ -13,7 +13,7 @@ func NewDefaultConfig() Config {
 	return Config{
 		Enabled:        false,
 		BaseURL:        "https://graphql.anilist.co",
-		RateLimit:      2 * time.Second,
+		RateLimit:      2500 * time.Millisecond,
 		RateLimitBurst: 1,
 	}
 }
