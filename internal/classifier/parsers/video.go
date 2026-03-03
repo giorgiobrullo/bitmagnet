@@ -259,7 +259,19 @@ func parseXxxTitle(name string) string {
 		isDate := (n2 >= 1 && n2 <= 12 && n3 >= 1 && n3 <= 31) ||
 			(n1 >= 1 && n1 <= 31 && n2 >= 1 && n2 <= 12)
 		if isDate {
-			name = strings.TrimSpace(m[1]) + " " + strings.TrimSpace(m[5])
+			// Strip tech tokens from the scene name portion after the date,
+			// since the main tech-stripping loop (step 3) ran before date detection
+			// and couldn't strip tokens like "XXX 1080p MP4" that follow the scene name.
+			sceneParts := strings.Fields(m[5])
+			for len(sceneParts) > 0 {
+				last := strings.ToLower(sceneParts[len(sceneParts)-1])
+				if xxxTechTokens[last] {
+					sceneParts = sceneParts[:len(sceneParts)-1]
+				} else {
+					break
+				}
+			}
+			name = strings.TrimSpace(m[1]) + " " + strings.Join(sceneParts, " ")
 		}
 	}
 
