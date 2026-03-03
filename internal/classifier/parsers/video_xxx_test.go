@@ -1,0 +1,124 @@
+package parsers
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestParseXxxTitle(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		// === Western dated scenes: Studio.YY.MM.DD.Scene.Name.XXX.quality ===
+		// The title should include the studio prefix and strip tech tokens.
+		{
+			name:     "standard dated scene with studio",
+			input:    "Vixen.22.05.20.Agatha.Vega.XXX.1080p.MP4-WRB",
+			expected: "Vixen Agatha Vega",
+		},
+		{
+			name:     "NubileFilms dated scene",
+			input:    "NubileFilms.25.12.11.Maya.Sinn.Instrument.Of.Pleasure.XXX.1080p.MP4-WRB[XC]",
+			expected: "NubileFilms Maya Sinn Instrument Of Pleasure",
+		},
+		{
+			name:     "DaneJones dated scene",
+			input:    "DaneJones.16.05.03.Mona.Kim.Sexual.Adrenaline.XXX.1080p.MP4-KTR[VR56]",
+			expected: "DaneJones Mona Kim Sexual Adrenaline",
+		},
+		{
+			name:     "BrazzersExxtra dated scene",
+			input:    "BrazzersExxtra.23.06.13.Jesse.Pony.Slip.Sliding.Into.Her.Stuck.Pussy.XXX.720p.MP4-XXX[XC]",
+			expected: "BrazzersExxtra Jesse Pony Slip Sliding Into Her Stuck Pussy",
+		},
+		{
+			name:     "Slayed dated scene",
+			input:    "Slayed.22.05.31.Violet.Myers.And.Anissa.Kate.XXX.1080p.MP4-NBQ[rarbg]",
+			expected: "Slayed Violet Myers And Anissa Kate",
+		},
+		{
+			name:     "FreeUseFantasy HEVC scene",
+			input:    "FreeUseFantasy.21.05.26.Honey.Hayes.Dani.Blu.And.Ashley.Aleigh.Hypnodick.XXX.1080p.HEVC.x265.PRT",
+			expected: "FreeUseFantasy Honey Hayes Dani Blu And Ashley Aleigh Hypnodick",
+		},
+		{
+			name:     "AnalOnly HEVC scene",
+			input:    "AnalOnly.21.09.26.Kyler.Quinn.XXX.1080p.HEVC.x265.PRT",
+			expected: "AnalOnly Kyler Quinn",
+		},
+		{
+			name:     "BLACKED 4K scene",
+			input:    "BLACKED.19.09.27.bella.rolland-4K",
+			expected: "BLACKED bella rolland",
+		},
+		{
+			name:     "RickysRoom HEVC scene",
+			input:    "RickysRoom.25.11.30.Chanell.Heart.Live.Show.2.XXX.1080p.HEVC.x265.PRT",
+			expected: "RickysRoom Chanell Heart Live Show 2",
+		},
+		{
+			name:     "PornMegaLoad HEVC scene",
+			input:    "PornMegaLoad.22.02.25.Selah.Rain.The.Swinging.MILF.And.The.Swinging.Dick.XXX.1080p.HEVC.x265.PRT[XvX]",
+			expected: "PornMegaLoad Selah Rain The Swinging MILF And The Swinging Dick",
+		},
+		{
+			name:     "OnlyTeenBlowJobs WEB scene",
+			input:    "OnlyTeenBlowJobs.19.06.27.Lexi.Lore.Homework.Break.XXX.720p.WEB.x264-GalaXXXy[XvX]",
+			expected: "OnlyTeenBlowJobs Lexi Lore Homework Break",
+		},
+		{
+			name:     "MyPervyFamily 480p scene",
+			input:    "MyPervyFamily.24.04.11.Sophia.Leone.My.Submissive.Stepsis.XXX.1080p.MP4-P2P[XC]",
+			expected: "MyPervyFamily Sophia Leone My Submissive Stepsis",
+		},
+		{
+			name:     "1111Customs dated scene",
+			input:    "1111Customs.25.02.06.Penny.Barber.Nervous.Knots.A.Mothers.Touch.In.First.Date.Dance.XXX.480p.MP4-XXX[XC]",
+			expected: "1111Customs Penny Barber Nervous Knots A Mothers Touch In First Date Dance",
+		},
+		{
+			name:     "SheSeducedMe multiple performers",
+			input:    "SheSeducedMe.26.02.23.Alina.Angel.Clair.Black.Daydream.Daisy.And.Freya.Von.Doom.XXX.480p.MP4-XXX[XC]",
+			expected: "SheSeducedMe Alina Angel Clair Black Daydream Daisy And Freya Von Doom",
+		},
+		{
+			name:     "BrazzersExxtra with double dot before scene",
+			input:    "BrazzersExxtra.20.04.27.Vina.Sky.The.Gape.That.Keeps.On.Giving..480p.MP4-XXX",
+			expected: "BrazzersExxtra Vina Sky The Gape That Keeps On Giving",
+		},
+		{
+			name:     "boobday lowercase with xxx in middle",
+			input:    "boobday.17.07.10.sirena.xxx.and.katrina.moreno.mp4",
+			expected: "boobday sirena xxx and katrina moreno",
+		},
+		{
+			name:     "brattysis lowercase no XXX marker",
+			input:    "brattysis.17.12.15.sydney.cole.fucking.my.step.sister.mp4",
+			expected: "brattysis sydney cole fucking my step sister",
+		},
+		// === Non-dated xxx titles: should return full cleaned title ===
+		{
+			name:     "simple xxx title no date",
+			input:    "The XXX Movie 1080p",
+			expected: "The XXX Movie",
+		},
+		{
+			name:     "title with brackets and tech",
+			input:    "Gangland Cream Pie Volume 6.XXX.720P",
+			expected: "Gangland Cream Pie Volume 6",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			result := parseXxxTitle(tc.input)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
