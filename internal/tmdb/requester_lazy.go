@@ -71,24 +71,11 @@ func newRequester(ctx context.Context, config Config, logger *zap.SugaredLogger)
 					SetTimeout(10 * time.Second).
 					EnableTrace().
 					SetLogger(logger).
-					OnBeforeRequest(func(c *resty.Client, r *resty.Request) error {
-						// Use the per-request context instead of the captured init
-						// context, so the semaphore/limiter survive after the first
-						// calling job completes and its context is canceled.
-						reqCtx := r.Context()
-						if err := semaphore.Acquire(reqCtx, 1); err != nil {
-							return err
-						}
-						if err := limiter.Wait(reqCtx); err != nil {
-							semaphore.Release(1)
-							return err
-						}
-						return nil
-					}).
-					OnAfterResponse(func(c *resty.Client, r *resty.Response) error {
-						semaphore.Release(1)
-						return nil
+					AddRetryCondition(func(r *resty.Response, err error) bool {
+						return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)
 					}),
+				sem:     semaphore,
+				limiter: limiter,
 			},
 			isUnauthorized: &concurrency.AtomicValue[bool]{},
 		},

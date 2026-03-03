@@ -50,21 +50,12 @@ func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 		SetTimeout(15 * time.Second).
 		EnableTrace()
 
-	c.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
-		reqCtx := req.Context()
-		if err := sem.Acquire(reqCtx, 1); err != nil {
-			return err
-		}
-		return limiter.Wait(reqCtx)
-	})
-
-	c.OnAfterResponse(func(_ *resty.Client, _ *resty.Response) error {
-		sem.Release(1)
-		return nil
+	c.AddRetryCondition(func(r *resty.Response, err error) bool {
+		return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)
 	})
 
 	return requesterLogger{
-		requester: requester{resty: c},
+		requester: requester{resty: c, sem: sem, limiter: limiter},
 		logger:    logger,
 	}, nil
 }

@@ -38,20 +38,12 @@ func (r *requesterLazy) Request(ctx context.Context, path string, queryParams ma
 			EnableTrace().
 			SetHeader("User-Agent", "bitmagnet/1.0 (https://github.com/bitmagnet-io/bitmagnet)")
 
-		c.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
-			if err := sem.Acquire(req.Context(), 1); err != nil {
-				return err
-			}
-			return limiter.Wait(req.Context())
-		})
-
-		c.OnAfterResponse(func(_ *resty.Client, _ *resty.Response) error {
-			sem.Release(1)
-			return nil
+		c.AddRetryCondition(func(r *resty.Response, err error) bool {
+			return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)
 		})
 
 		r.requester = requesterLogger{
-			requester: requester{resty: c},
+			requester: requester{resty: c, sem: sem, limiter: limiter},
 			logger:    r.logger,
 		}
 	})

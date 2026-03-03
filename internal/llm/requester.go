@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
+	"golang.org/x/sync/semaphore"
+	"golang.org/x/time/rate"
 )
 
 type Requester interface {
@@ -13,7 +15,9 @@ type Requester interface {
 }
 
 type requester struct {
-	resty *resty.Client
+	resty   *resty.Client
+	sem     *semaphore.Weighted
+	limiter *rate.Limiter
 }
 
 func newError(msg string) error {
@@ -26,6 +30,14 @@ func (r requester) Request(
 	body any,
 	result any,
 ) (*resty.Response, error) {
+	if err := r.sem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer r.sem.Release(1)
+	if err := r.limiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+
 	res, err := r.resty.R().
 		SetContext(ctx).
 		SetBody(body).

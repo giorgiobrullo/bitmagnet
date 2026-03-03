@@ -72,15 +72,6 @@ func (r *requesterLazy) newRequester() (Requester, error) {
 		EnableTrace()
 
 	c.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
-		reqCtx := req.Context()
-		if err := sem.Acquire(reqCtx, 1); err != nil {
-			return err
-		}
-		if err := limiter.Wait(reqCtx); err != nil {
-			sem.Release(1)
-			return err
-		}
-
 		r.tokenMu.Lock()
 		token := r.accessToken
 		r.tokenMu.Unlock()
@@ -91,8 +82,6 @@ func (r *requesterLazy) newRequester() (Requester, error) {
 	})
 
 	c.OnAfterResponse(func(_ *resty.Client, resp *resty.Response) error {
-		sem.Release(1)
-
 		// Auto-refresh token on 401.
 		if resp.StatusCode() == 401 {
 			r.logger.Info("IGDB token expired, refreshing...")
@@ -103,9 +92,13 @@ func (r *requesterLazy) newRequester() (Requester, error) {
 		return nil
 	})
 
+	c.AddRetryCondition(func(r *resty.Response, err error) bool {
+		return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)
+	})
+
 	return requesterLogger{
 		requester: requesterFailFast{
-			requester:      requester{resty: c},
+			requester:      requester{resty: c, sem: sem, limiter: limiter},
 			isUnauthorized: &concurrency.AtomicValue[bool]{},
 		},
 		logger: r.logger,
