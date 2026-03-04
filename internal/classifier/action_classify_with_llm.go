@@ -76,7 +76,22 @@ func (classifyWithLLMAction) compileAction(ctx compilerContext) (action, error) 
 				"year", result.Year,
 				"confidence", result.Confidence)
 
-			cl.ContentType = model.NewNullContentType(contentType)
+			// Only update the content type if it isn't already set.
+			// When called for title extraction (content type already determined
+			// by a previous pipeline step), preserve the existing type.
+			if !cl.ContentType.Valid {
+				// Reject xxx from LLM: xxx detection has dedicated pipeline steps
+				// (keyword matching, JAV detection) that run before the LLM.
+				// The LLM is unreliable for xxx classification and produces
+				// false positives (e.g., music/anime misclassified as xxx).
+				if contentType == model.ContentTypeXxx {
+					ctx.logger.Infow("llm xxx classification rejected",
+						"title", result.Title,
+						"confidence", result.Confidence)
+					return cl, classification.ErrUnmatched
+				}
+				cl.ContentType = model.NewNullContentType(contentType)
+			}
 
 			if result.Title != "" {
 				cl.BaseTitle = model.NewNullString(result.Title)
