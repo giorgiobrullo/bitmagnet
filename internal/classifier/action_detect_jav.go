@@ -57,17 +57,6 @@ var (
 	}
 )
 
-// isYearLike returns true if a numeric string looks like a calendar year (1900-2099).
-// JAV codes rarely use year-like numbers, while movie/content titles commonly do
-// (e.g., "AVATAR-1981", "TITANIC-1997").
-func isYearLike(s string) bool {
-	if len(s) != 4 {
-		return false
-	}
-	n, _ := strconv.Atoi(s)
-	return n >= 1900 && n <= 2099
-}
-
 // isValidMMDDYY checks if a 6-digit string represents a plausible MMDDYY date.
 func isValidMMDDYY(s string) bool {
 	if len(s) != 6 {
@@ -88,21 +77,21 @@ func ExtractJAVCode(name string) string {
 	// Try standard JAV code at start (most reliable).
 	if m := javCodeRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
-		if !javExcludePrefixes[prefix] && !isYearLike(m[2]) {
+		if !javExcludePrefixes[prefix] {
 			return prefix + "-" + m[2]
 		}
 	}
 	// Try non-hyphenated JAV code at start: HND573, DTRS019, etc.
 	if m := javCodeNoHyphenRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
-		if !javExcludePrefixes[prefix] && !isYearLike(m[2]) {
+		if !javExcludePrefixes[prefix] {
 			return prefix + "-" + m[2]
 		}
 	}
 	// Number-prefix JAV codes: 390JNT-112, 259LUXU-1234, etc.
 	if m := javCodeNumPrefixRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[2])
-		if !javExcludePrefixes[prefix] && !isYearLike(m[3]) {
+		if !javExcludePrefixes[prefix] {
 			return m[1] + prefix + "-" + m[3]
 		}
 	}
@@ -122,7 +111,7 @@ func ExtractJAVCode(name string) string {
 	// Loose scan: JAV codes anywhere after non-letter characters.
 	if m := javCodeLooseRegex.FindStringSubmatch(name); m != nil {
 		prefix := strings.ToUpper(m[1])
-		if !javExcludePrefixes[prefix] && !isYearLike(m[2]) {
+		if !javExcludePrefixes[prefix] {
 			return prefix + "-" + m[2]
 		}
 	}

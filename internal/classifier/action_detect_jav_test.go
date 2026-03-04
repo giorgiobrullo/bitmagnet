@@ -76,8 +76,6 @@ func TestExtractJAVCode(t *testing.T) {
 		{name: "tech prefix excluded", input: "WEB-480 something", expected: ""},
 		{name: "HEVC codec excluded", input: "HEVC-265 something", expected: ""},
 		{name: "SACD format excluded", input: "SACD-2626 something", expected: ""},
-		{name: "movie title with year", input: "AVATAR-1981 remastered", expected: ""},
-		{name: "year-like number after site", input: "site.com@TITLE-2023 HD", expected: ""},
 		{name: "regular movie", input: "The.Matrix.1999.1080p.BluRay.x264", expected: ""},
 		{name: "TV show", input: "Breaking.Bad.S01E01.720p", expected: ""},
 	}
@@ -87,32 +85,6 @@ func TestExtractJAVCode(t *testing.T) {
 			t.Parallel()
 			result := ExtractJAVCode(tc.input)
 			assert.Equal(t, tc.expected, result)
-		})
-	}
-}
-
-func TestIsYearLike(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{"1981", true},
-		{"2023", true},
-		{"1900", true},
-		{"2099", true},
-		{"1899", false},
-		{"2100", false},
-		{"541", false},  // 3-digit JAV number
-		{"0541", false}, // leading zero
-		{"12345", false},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.input, func(t *testing.T) {
-			t.Parallel()
-			assert.Equal(t, tc.expected, isYearLike(tc.input))
 		})
 	}
 }
