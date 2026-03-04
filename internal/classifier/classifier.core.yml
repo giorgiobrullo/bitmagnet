@@ -66,11 +66,18 @@ workflows:
             # match xxx:
             # Only check torrent base name (not file paths) to avoid false positives
             # where a single episode title in a TV season pack matches an xxx keyword.
+            # Also skip xxx classification when TV episode patterns are detected
+            # (S01E01, SEASON.01, S01.COMPLETE, S01-S16) unless the name contains
+            # the literal word "XXX" — this prevents false positives like
+            # "Sex Education S04E01" while preserving "GirlsUnderArrest.S01E04.XXX".
             - if_else:
                 condition:
                   and:
                     - "torrent.files.map(f, (f.extension in extensions.video || f.extension in extensions.image) ? f.size : - f.size).sum() > 0"
                     - "torrent.baseName.matches(keywords.xxx)"
+                    - or:
+                        - not: 'torrent.baseName.matches("(?i)(S\\d{2}E\\d{2}|SEASON[.\\s_]\\d{2}|S\\d{2}[.\\s_]COMPLETE|S\\d{2}-S\\d{2})")'
+                        - 'torrent.baseName.matches("\\bXXX\\b")'
                 if_action:
                   set_content_type: xxx
                 else_action: unmatched

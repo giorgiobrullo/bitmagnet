@@ -229,6 +229,99 @@ func TestClassifier(t *testing.T) {
 				},
 			},
 		},
+		// --- TV episode pattern exclusion: xxx keywords + S01E01 → NOT xxx ---
+		// "Sex Education" has keyword "sex" but S04E01 pattern → should not be xxx.
+		// Falls through to tv_show matching via parse_video_content.
+		{
+			torrent: model.Torrent{
+				Name:        "Sex.Education.S04E01.720p.WEBRip.x264.mkv",
+				FilesStatus: model.FilesStatusSingle,
+				Extension:   model.NewNullString("mkv"),
+				Size:        1000000000,
+			},
+			prepareMocks: func(mocks testClassifierMocks) {
+				mocks.search.On("ContentBySearch", matchContext, model.ContentTypeTvShow, "Sex Education", model.Year(0)).
+					Return(model.Content{}, classification.ErrUnmatched)
+				mocks.tmdbClient.On("SearchTv", matchContext, mock.Anything).Return(tmdb.SearchTvResponse{}, nil)
+			},
+			expected: classification.Result{
+				ContentAttributes: classification.ContentAttributes{
+					ContentType:     model.NewNullContentType(model.ContentTypeTvShow),
+					BaseTitle:       model.NewNullString("Sex Education"),
+					VideoResolution: model.NewNullVideoResolution(model.VideoResolutionV720p),
+					VideoSource:     model.NewNullVideoSource(model.VideoSourceWEBRip),
+					VideoCodec:      model.NewNullVideoCodec(model.VideoCodecX264),
+					Episodes:        model.Episodes{4: {1: {}}},
+				},
+			},
+		},
+		// "Hardcore Pawn" has keyword "hardcore" but S08E19 pattern → should not be xxx
+		{
+			torrent: model.Torrent{
+				Name:        "Hardcore.Pawn.S08E19.1080p.HEVC.x265-MeGusta.mkv",
+				FilesStatus: model.FilesStatusSingle,
+				Extension:   model.NewNullString("mkv"),
+				Size:        1000000000,
+			},
+			prepareMocks: func(mocks testClassifierMocks) {
+				mocks.search.On("ContentBySearch", matchContext, model.ContentTypeTvShow, "Hardcore Pawn", model.Year(0)).
+					Return(model.Content{}, classification.ErrUnmatched)
+				mocks.tmdbClient.On("SearchTv", matchContext, mock.Anything).Return(tmdb.SearchTvResponse{}, nil)
+			},
+			expected: classification.Result{
+				ContentAttributes: classification.ContentAttributes{
+					ContentType:     model.NewNullContentType(model.ContentTypeTvShow),
+					BaseTitle:       model.NewNullString("Hardcore Pawn"),
+					VideoResolution: model.NewNullVideoResolution(model.VideoResolutionV1080p),
+					VideoCodec:      model.NewNullVideoCodec(model.VideoCodecX265),
+					Episodes:        model.Episodes{8: {19: {}}},
+					ReleaseGroup:    model.NewNullString("MeGusta"),
+				},
+			},
+		},
+		// "Simpsons XXXIII" has keyword "xxx" (via XXXIII) but S34E06 → should not be xxx
+		{
+			torrent: model.Torrent{
+				Name:        "The.Simpsons.S34E06.Treehouse.of.Horror.XXXIII.1080p.mkv",
+				FilesStatus: model.FilesStatusSingle,
+				Extension:   model.NewNullString("mkv"),
+				Size:        1000000000,
+			},
+			prepareMocks: func(mocks testClassifierMocks) {
+				mocks.search.On("ContentBySearch", matchContext, model.ContentTypeTvShow, "The Simpsons", model.Year(0)).
+					Return(model.Content{}, classification.ErrUnmatched)
+				mocks.tmdbClient.On("SearchTv", matchContext, mock.Anything).Return(tmdb.SearchTvResponse{}, nil)
+			},
+			expected: classification.Result{
+				ContentAttributes: classification.ContentAttributes{
+					ContentType:     model.NewNullContentType(model.ContentTypeTvShow),
+					BaseTitle:       model.NewNullString("The Simpsons"),
+					VideoResolution: model.NewNullVideoResolution(model.VideoResolutionV1080p),
+					Episodes:        model.Episodes{34: {6: {}}},
+				},
+			},
+		},
+		// Explicit "XXX" + S01E04 → SHOULD still be xxx (override via \bXXX\b)
+		{
+			torrent: model.Torrent{
+				Name:        "SomeStudio.S01E04.Performer.Name.XXX.1080p.MP4",
+				FilesStatus: model.FilesStatusSingle,
+				Extension:   model.NewNullString("mp4"),
+				Size:        1000000000,
+			},
+			prepareMocks: func(mocks testClassifierMocks) {
+				mocks.search.On("ContentBySearch", matchContext, model.ContentTypeXxx, mock.Anything, mock.Anything).
+					Return(model.Content{}, classification.ErrUnmatched)
+				mocks.tmdbClient.On("SearchMovie", matchContext, mock.Anything).Return(tmdb.SearchMovieResponse{}, nil)
+			},
+			expected: classification.Result{
+				ContentAttributes: classification.ContentAttributes{
+					ContentType:     model.NewNullContentType(model.ContentTypeXxx),
+					BaseTitle:       model.NewNullString("SomeStudio S01E04 Performer Name"),
+					VideoResolution: model.NewNullVideoResolution(model.VideoResolutionV1080p),
+				},
+			},
+		},
 		// --- LLM classifier tests ---
 		// LLM: classify ambiguous Chinese torrent as tv_show
 		{
