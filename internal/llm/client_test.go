@@ -128,13 +128,14 @@ func TestNormalizeContentType(t *testing.T) {
 		{"tvshow", "tv_show"},
 		{"tv", "tv_show"},
 		{"anime", "tv_show"},
-		{"adult", "xxx"},
-		{"porn", "xxx"},
+		{"adult", "unknown"},
+		{"porn", "unknown"},
+		{"xxx", "unknown"},
 		{"book", "ebook"},
 		{"epub", "epub"},       // not in normalize map, returned as lowercase
 		{"MOVIE", "movie"},     // uppercased input lowered
 		{"TV Show", "tv_show"}, // normalized via lowercase + map
-		{"  xxx  ", "xxx"},     // trimmed
+		{"  xxx  ", "unknown"}, // xxx normalized to unknown
 		{"comics", "comic"},
 	}
 

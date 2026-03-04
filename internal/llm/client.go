@@ -18,8 +18,9 @@ var normalizeType = map[string]string{
 	"tv show":   "tv_show",
 	"tv":        "tv_show",
 	"anime":     "tv_show",
-	"adult":     "xxx",
-	"porn":      "xxx",
+	"adult":     "unknown",
+	"porn":      "unknown",
+	"xxx":       "unknown",
 	"book":      "ebook",
 	"e-book":    "ebook",
 	"audio":     "music",
@@ -32,14 +33,15 @@ var normalizeType = map[string]string{
 
 const classifyPrompt = `You classify torrent names into content types. Output ONLY valid JSON, no other text.
 
-{"type":"movie|tv_show|music|ebook|comic|audiobook|game|software|xxx|unknown","title":"clean english title","year":0,"confidence":0.0}
+{"type":"movie|tv_show|music|ebook|comic|audiobook|game|software|unknown","title":"clean english title","year":0,"confidence":0.0}
 
 Rules:
-- type: one of the listed values exactly
+- type: one of the listed values exactly. Adult/xxx content is detected separately — never return "xxx", "adult", or "porn" as the type.
 - title: the clean content title extracted from the torrent name, romanized to ASCII if needed
 - year: release year as integer, 0 if unknown
 - confidence: 0.0 to 1.0, how sure you are about the type classification
 - The input may include sample filenames from the torrent after "Files:" — use these as extra signal for the content type
+- Japanese anime titles in [SubGroup] format are tv_show, not adult content
 
 Examples:
 Input: "[SubsPlease] Sousou no Frieren - 01 (1080p) [F02B7A7E].mkv"
@@ -47,6 +49,9 @@ Output: {"type":"tv_show","title":"Frieren Beyond Journeys End","year":2023,"con
 
 Input: "Опенгеймер.2023.D.BDRip.1080p"
 Output: {"type":"movie","title":"Oppenheimer","year":2023,"confidence":0.95}
+
+Input: "[LoliHouse] Puniru wa Kawaii Slime - 24 [WebRip 1080p HEVC-10bit AAC SRTx2].mkv"
+Output: {"type":"tv_show","title":"Puniru is a Cute Slime","year":2024,"confidence":0.9}
 
 Input: "BTF7___1080_2025"
 Output: {"type":"unknown","title":"","year":2025,"confidence":0.2}`

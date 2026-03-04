@@ -129,15 +129,106 @@ func TestClassify_Ebook(t *testing.T) {
 	t.Logf("Result: type=%s title=%q year=%d confidence=%.2f", result.Type, result.Title, result.Year, result.Confidence)
 }
 
-func TestClassify_AdultContent(t *testing.T) {
+func TestClassify_AdultContent_ReturnsUnknown(t *testing.T) {
 	c := newTestClient(t)
 
+	// Adult content is detected by keyword matching before the LLM.
+	// The LLM prompt excludes xxx — it should return "unknown" instead.
 	result, err := c.Classify(context.Background(), ClassifyInput{
 		Name: "Tushy Raw V35 XXX 1080p WEB-DL",
 	})
 	require.NoError(t, err)
 
-	assert.Equal(t, "xxx", result.Type)
-	assert.GreaterOrEqual(t, result.Confidence, 0.8)
+	assert.NotEqual(t, "xxx", result.Type, "LLM should not return xxx (adult detection is handled separately)")
 	t.Logf("Result: type=%s title=%q year=%d confidence=%.2f", result.Type, result.Title, result.Year, result.Confidence)
+}
+
+// Regression tests: content that was previously misclassified as xxx by the LLM.
+func TestClassify_NotXxx_Anime(t *testing.T) {
+	c := newTestClient(t)
+
+	tests := []struct {
+		name     string
+		input    string
+		wantType string
+	}{
+		{
+			name:     "LoliHouse anime episode",
+			input:    "[LoliHouse] Puniru wa Kawaii Slime - 24 [WebRip 1080p HEVC-10bit AAC SRTx2].mkv",
+			wantType: "tv_show",
+		},
+		{
+			name:     "SubsPlease anime episode",
+			input:    "[SubsPlease] NEET Kunoichi to Nazeka Dousei Hajimemashita - 03 (1080p) [021F0F5E].mkv",
+			wantType: "tv_show",
+		},
+		{
+			name:     "Erai-raws anime episode",
+			input:    "[Erai-raws] Niehime to Kemono no Ou - 24 [1080p][Multiple Subtitle][20BDBEA7].mkv",
+			wantType: "tv_show",
+		},
+		{
+			name:     "anime season pack",
+			input:    "Magical Girl Raising Project S01 [Bluray-1080p Remux-h264]-LazyRemux",
+			wantType: "tv_show",
+		},
+		{
+			name:     "anime film",
+			input:    "[Moe] DATE a Bullet (BD 1080p x264 FLAC)",
+			wantType: "tv_show",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := c.Classify(context.Background(), ClassifyInput{Name: tc.input})
+			require.NoError(t, err)
+
+			assert.Equal(t, tc.wantType, result.Type)
+			assert.NotEqual(t, "xxx", result.Type, "anime should not be classified as xxx")
+			t.Logf("Result: type=%s title=%q year=%d confidence=%.2f", result.Type, result.Title, result.Year, result.Confidence)
+		})
+	}
+}
+
+func TestClassify_NotXxx_MusicAndMovies(t *testing.T) {
+	c := newTestClient(t)
+
+	tests := []struct {
+		name     string
+		input    string
+		wantType string
+	}{
+		{
+			name:     "Steely Dan album",
+			input:    "Steely Dan - Aja (Reissue) (2023) [24Bit-192kHz] FLAC [PMEDIA]",
+			wantType: "music",
+		},
+		{
+			name:     "Andre Bratten album",
+			input:    "Andre Bratten - Math Ilium Ion [STS257D] FLAC-2015",
+			wantType: "music",
+		},
+		{
+			name:     "Pulp Fiction movie",
+			input:    "Pulp Fiction (1994) (2160p BluRay x265 HEVC 10bit HDR AAC 5.1 Tigole)",
+			wantType: "movie",
+		},
+		{
+			name:     "Dogengers TV show",
+			input:    "[MagicStar] Dogengers ~High School~ EP12 END [WEBDL] [1080p] [AMZN]",
+			wantType: "tv_show",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := c.Classify(context.Background(), ClassifyInput{Name: tc.input})
+			require.NoError(t, err)
+
+			assert.Equal(t, tc.wantType, result.Type)
+			assert.NotEqual(t, "xxx", result.Type, "should not be classified as xxx")
+			t.Logf("Result: type=%s title=%q year=%d confidence=%.2f", result.Type, result.Title, result.Year, result.Confidence)
+		})
+	}
 }
