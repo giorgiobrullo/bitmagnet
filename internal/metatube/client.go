@@ -120,14 +120,17 @@ func (c *client) initEngine() {
 		return
 	}
 
-	// Disable theporndb provider by setting its priority to 0.
-	// NOTE: We use WithActorProviderConfig as a workaround for an upstream bug in
+	// Disable ThePornDB providers — bitmagnet handles PornDB matching separately.
+	// Must use exact provider names: ThePornDBScene, ThePornDBMovie, ThePornDBActor.
+	// We use WithActorProviderConfig as a workaround for an upstream bug in
 	// engine/init.go:64 where initMovieProviders reads actorProviderConfigs instead
 	// of movieProviderConfigs, so WithMovieProviderConfig is silently ignored.
 	disableConfig := providerConfig{data: map[string]string{"priority": "0"}}
 
 	c.engine = engine.New(db,
-		engine.WithActorProviderConfig("theporndb", disableConfig),
+		engine.WithActorProviderConfig("ThePornDBScene", disableConfig),
+		engine.WithActorProviderConfig("ThePornDBMovie", disableConfig),
+		engine.WithActorProviderConfig("ThePornDBActor", disableConfig),
 		engine.WithRequestTimeout(30*time.Second),
 	)
 	c.engine.DBAutoMigrate(true)
