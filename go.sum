@@ -191,6 +191,8 @@ github.com/gin-contrib/sse v1.1.0 h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w
 github.com/gin-contrib/sse v1.1.0/go.mod h1:hxRZ5gVpWMT7Z0B0gSNYqqsSCNIJMjzvm6fqCz9vjwM=
 github.com/gin-gonic/gin v1.11.0 h1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=
 github.com/gin-gonic/gin v1.11.0/go.mod h1:+iq/FyxlGzII0KHiBGjuNn4UNENUlKbGlNmc+W50Dls=
+github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260304133744-7dffcb587917 h1:n+XX/0vT/T9VXbDqGvZmsB2Fxzt5+vA58p/7i4a6cMM=
+github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260304133744-7dffcb587917/go.mod h1:2Z4zo9Xs1aRQ8gwJ35BcOd9GvDyqPX6CyziQOSyJNLo=
 github.com/glebarez/go-sqlite v1.22.0 h1:uAcMJhaA6r3LHMTFgP0SifzgXg46yJkgxqyuyec+ruQ=
 github.com/glebarez/go-sqlite v1.22.0/go.mod h1:PlBIdHe0+aUEFn+r2/uthrWq4FxbzugL0L8Li6yQJbc=
 github.com/glebarez/sqlite v1.11.0 h1:wSG0irqzP6VurnMEpFGer5Li19RpIRi2qvQz++w0GMw=
@@ -408,8 +410,6 @@ github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxU
 github.com/mattn/goveralls v0.0.12 h1:PEEeF0k1SsTjOBQ8FOmrOAoCu4ytuMaWCnWe94zxbCg=
 github.com/mattn/goveralls v0.0.12/go.mod h1:44ImGEUfmqH8bBtaMrYKsM65LXfNLWmwaxFGjZwgMSQ=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
-github.com/metatube-community/metatube-sdk-go v1.3.3-0.20260225033130-43a027bc4a40 h1:8g6tVGnNyriy+2BvU5CRgGUwjwuC0yaig4j5QJ+IhHk=
-github.com/metatube-community/metatube-sdk-go v1.3.3-0.20260225033130-43a027bc4a40/go.mod h1:2Z4zo9Xs1aRQ8gwJ35BcOd9GvDyqPX6CyziQOSyJNLo=
 github.com/mfridman/interpolate v0.0.2 h1:pnuTK7MQIxxFz1Gr+rjSIx9u7qVjf5VOoM/u6BbAxPY=
 github.com/mfridman/interpolate v0.0.2/go.mod h1:p+7uk6oE07mpE/Ik1b8EckO0O4ZXiGAfshKBWLUM9Xg=
 github.com/mgdigital/gorm-cache/v2 v2.0.0-20230912113927-f2a8dd92a386 h1:DQflskA3IkTbNx6+9I9pI3Q/9OAKnBeBimydC6Tue4g=
