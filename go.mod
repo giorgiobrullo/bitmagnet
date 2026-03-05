@@ -26,7 +26,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/joho/godotenv v1.5.1
-	github.com/metatube-community/metatube-sdk-go v1.3.3-0.20260225033130-43a027bc4a40
+	github.com/metatube-community/metatube-sdk-go v1.3.3-0.20260305012045-533865d8065e
 	github.com/mgdigital/gorm-cache/v2 v2.0.0-20230912113927-f2a8dd92a386
 	github.com/mozillazg/go-unidecode v0.2.0
 	github.com/onsi/ginkgo/v2 v2.23.3
@@ -239,4 +239,4 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/metatube-community/metatube-sdk-go => github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260304133744-7dffcb587917
+replace github.com/metatube-community/metatube-sdk-go => github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012045-533865d8065e
