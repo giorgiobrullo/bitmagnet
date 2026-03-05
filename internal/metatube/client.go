@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -124,12 +125,46 @@ func (c *client) initEngine() {
 	// Disable ThePornDB providers — bitmagnet handles PornDB matching separately.
 	disableConfig := providerConfig{data: map[string]string{"priority": "0"}}
 
-	c.engine = engine.New(db,
+	opts := []engine.Option{
 		engine.WithMovieProviderConfig("ThePornDBScene", disableConfig),
 		engine.WithMovieProviderConfig("ThePornDBMovie", disableConfig),
 		engine.WithActorProviderConfig("ThePornDBActor", disableConfig),
-		engine.WithRequestTimeout(30*time.Second),
-	)
+		engine.WithRequestTimeout(30 * time.Second),
+	}
+
+	// FC2 auth: auto-login with credentials, or manual session cookie
+	if email, pass := os.Getenv("METATUBE_FC2_EMAIL"), os.Getenv("METATUBE_FC2_PASSWORD"); email != "" && pass != "" {
+		sessionID, loginErr := loginFC2(email, pass, c.logger)
+		if loginErr != nil {
+			c.logger.Warnw("metatube: FC2 login failed, provider will be unavailable", "error", loginErr)
+		} else {
+			opts = append(opts, engine.WithMovieProviderConfig("FC2", providerConfig{
+				data: map[string]string{"session_id": sessionID},
+			}))
+		}
+	} else if sessionID := os.Getenv("METATUBE_FC2_SESSION_ID"); sessionID != "" {
+		opts = append(opts, engine.WithMovieProviderConfig("FC2", providerConfig{
+			data: map[string]string{"session_id": sessionID},
+		}))
+	}
+
+	// FC2PPVDB auth: auto-login with credentials, or manual session cookies
+	if email, pass := os.Getenv("METATUBE_FC2PPVDB_EMAIL"), os.Getenv("METATUBE_FC2PPVDB_PASSWORD"); email != "" && pass != "" {
+		xsrf, session, loginErr := loginFC2PPVDB(email, pass, c.logger)
+		if loginErr != nil {
+			c.logger.Warnw("metatube: FC2PPVDB login failed, provider will be unavailable", "error", loginErr)
+		} else {
+			opts = append(opts, engine.WithMovieProviderConfig("FC2PPVDB", providerConfig{
+				data: map[string]string{"xsrf_token": xsrf, "session": session},
+			}))
+		}
+	} else if xsrf, session := os.Getenv("METATUBE_FC2PPVDB_XSRF_TOKEN"), os.Getenv("METATUBE_FC2PPVDB_SESSION"); xsrf != "" && session != "" {
+		opts = append(opts, engine.WithMovieProviderConfig("FC2PPVDB", providerConfig{
+			data: map[string]string{"xsrf_token": xsrf, "session": session},
+		}))
+	}
+
+	c.engine = engine.New(db, opts...)
 	c.engine.DBAutoMigrate(true)
 }
 
