@@ -134,12 +134,12 @@ func (c *client) initEngine() {
 
 	// FC2 auth: auto-login with credentials, or manual session cookie
 	if email, pass := os.Getenv("METATUBE_FC2_EMAIL"), os.Getenv("METATUBE_FC2_PASSWORD"); email != "" && pass != "" {
-		sessionID, loginErr := loginFC2(email, pass, c.logger)
+		fc2Cookies, loginErr := loginFC2(email, pass, c.logger)
 		if loginErr != nil {
 			c.logger.Warnw("metatube: FC2 login failed, provider will be unavailable", "error", loginErr)
 		} else {
 			opts = append(opts, engine.WithMovieProviderConfig("FC2", providerConfig{
-				data: map[string]string{"session_id": sessionID},
+				data: fc2Cookies,
 			}))
 		}
 	} else if sessionID := os.Getenv("METATUBE_FC2_SESSION_ID"); sessionID != "" {
