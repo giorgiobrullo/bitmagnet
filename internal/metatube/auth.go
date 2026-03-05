@@ -154,30 +154,24 @@ func loginFC2ViaCamoufox(camoufoxURL, email, password string) (map[string]string
 		return nil, fmt.Errorf("camoufox returned %d: %s", resp.StatusCode, string(body))
 	}
 
-	var result struct {
-		SessionID   string `json:"session_id"`
-		CfClearance string `json:"cf_clearance"`
-		UserAgent   string `json:"user_agent"`
-		Error       string `json:"error"`
-	}
+	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse camoufox response: %w", err)
 	}
 
-	if result.Error != "" {
-		return nil, fmt.Errorf("camoufox error: %s", result.Error)
+	if errMsg, ok := result["error"].(string); ok && errMsg != "" {
+		return nil, fmt.Errorf("camoufox error: %s", errMsg)
 	}
 
-	if result.SessionID == "" {
+	cookies := make(map[string]string)
+	for k, v := range result {
+		if s, ok := v.(string); ok && s != "" {
+			cookies[k] = s
+		}
+	}
+
+	if cookies["session_id"] == "" {
 		return nil, fmt.Errorf("camoufox returned empty session_id")
-	}
-
-	cookies := map[string]string{"session_id": result.SessionID}
-	if result.CfClearance != "" {
-		cookies["cf_clearance"] = result.CfClearance
-	}
-	if result.UserAgent != "" {
-		cookies["user_agent"] = result.UserAgent
 	}
 
 	return cookies, nil
