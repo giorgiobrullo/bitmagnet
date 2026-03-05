@@ -75,8 +75,10 @@ func newHTTPClient() *http.Client {
 	}
 }
 
-// loginFC2 obtains an FC2 adult session cookie.
-// FC2 provides a CONTENTS_FC2_PHPSESSID on first visit to the adult site.
+// loginFC2 obtains an authenticated FC2 session cookie.
+// FC2 article pages require login and are behind Cloudflare, so we use a
+// Camoufox browser service (if available) to perform the login.
+// Falls back to a basic unauthenticated session from visiting the homepage.
 func loginFC2(email, password string, logger *zap.SugaredLogger) (string, error) {
 	// Check cache first
 	if cookies, ok := loadCachedCookies("FC2"); ok {
@@ -86,7 +88,20 @@ func loginFC2(email, password string, logger *zap.SugaredLogger) (string, error)
 		}
 	}
 
-	logger.Info("metatube: obtaining FC2 session...")
+	// Try Camoufox browser login (handles Cloudflare + reCAPTCHA)
+	if camoufoxURL := os.Getenv("CAMOUFOX_URL"); camoufoxURL != "" {
+		logger.Info("metatube: logging into FC2 via Camoufox...")
+		sid, err := loginFC2ViaCamoufox(camoufoxURL, email, password)
+		if err == nil {
+			logger.Info("metatube: FC2 login successful via Camoufox")
+			saveCachedCookies("FC2", map[string]string{"session_id": sid}, fc2CookieCacheTTL)
+			return sid, nil
+		}
+		logger.Warnw("metatube: Camoufox FC2 login failed, falling back to basic session", "error", err)
+	}
+
+	// Fallback: get a basic (unauthenticated) session from visiting the homepage
+	logger.Info("metatube: obtaining basic FC2 session...")
 	client := newHTTPClient()
 
 	req, err := http.NewRequest("GET", "https://adult.contents.fc2.com/", nil)
@@ -104,13 +119,54 @@ func loginFC2(email, password string, logger *zap.SugaredLogger) (string, error)
 	u, _ := url.Parse("https://adult.contents.fc2.com/")
 	for _, c := range client.Jar.Cookies(u) {
 		if c.Name == "CONTENTS_FC2_PHPSESSID" {
-			logger.Info("metatube: FC2 session obtained")
+			logger.Info("metatube: FC2 basic session obtained (article pages may not work)")
 			saveCachedCookies("FC2", map[string]string{"session_id": c.Value}, fc2CookieCacheTTL)
 			return c.Value, nil
 		}
 	}
 
 	return "", fmt.Errorf("FC2 did not return CONTENTS_FC2_PHPSESSID cookie")
+}
+
+// loginFC2ViaCamoufox calls the Camoufox auth HTTP API to perform browser-based
+// FC2 login (solves Cloudflare challenge + submits login form).
+func loginFC2ViaCamoufox(camoufoxURL, email, password string) (string, error) {
+	reqURL := fmt.Sprintf("%s/fc2-login?email=%s&password=%s",
+		camoufoxURL, url.QueryEscape(email), url.QueryEscape(password))
+
+	client := &http.Client{Timeout: 120 * time.Second} // Browser login takes time
+	resp, err := client.Get(reqURL)
+	if err != nil {
+		return "", fmt.Errorf("camoufox request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read camoufox response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("camoufox returned %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result struct {
+		SessionID string `json:"session_id"`
+		Error     string `json:"error"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", fmt.Errorf("failed to parse camoufox response: %w", err)
+	}
+
+	if result.Error != "" {
+		return "", fmt.Errorf("camoufox error: %s", result.Error)
+	}
+
+	if result.SessionID == "" {
+		return "", fmt.Errorf("camoufox returned empty session_id")
+	}
+
+	return result.SessionID, nil
 }
 
 // loginFC2PPVDB performs HTTP login to FC2PPVDB and returns session cookies.
