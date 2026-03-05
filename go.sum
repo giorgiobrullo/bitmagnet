@@ -191,8 +191,8 @@ github.com/gin-contrib/sse v1.1.0 h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w
 github.com/gin-contrib/sse v1.1.0/go.mod h1:hxRZ5gVpWMT7Z0B0gSNYqqsSCNIJMjzvm6fqCz9vjwM=
 github.com/gin-gonic/gin v1.11.0 h1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=
 github.com/gin-gonic/gin v1.11.0/go.mod h1:+iq/FyxlGzII0KHiBGjuNn4UNENUlKbGlNmc+W50Dls=
-github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012045-533865d8065e h1:FTuHD5A1eMGDlg5Ygj8Gdqb3Qt4kxDT0QW5fqppRkFE=
-github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012045-533865d8065e/go.mod h1:2Z4zo9Xs1aRQ8gwJ35BcOd9GvDyqPX6CyziQOSyJNLo=
+github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012747-dbdfb3400be4 h1:LJoAnPpVjirSU+wCdcNhDSd/d63Cnef1uxF1g7+BNNw=
+github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012747-dbdfb3400be4/go.mod h1:2Z4zo9Xs1aRQ8gwJ35BcOd9GvDyqPX6CyziQOSyJNLo=
 github.com/glebarez/go-sqlite v1.22.0 h1:uAcMJhaA6r3LHMTFgP0SifzgXg46yJkgxqyuyec+ruQ=
 github.com/glebarez/go-sqlite v1.22.0/go.mod h1:PlBIdHe0+aUEFn+r2/uthrWq4FxbzugL0L8Li6yQJbc=
 github.com/glebarez/sqlite v1.11.0 h1:wSG0irqzP6VurnMEpFGer5Li19RpIRi2qvQz++w0GMw=

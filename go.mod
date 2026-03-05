@@ -239,4 +239,4 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/metatube-community/metatube-sdk-go => github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012045-533865d8065e
+replace github.com/metatube-community/metatube-sdk-go => github.com/giorgiobrullo/metatube-sdk-go v1.3.3-0.20260305012747-dbdfb3400be4
