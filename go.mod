@@ -16,7 +16,7 @@ require (
 	github.com/frankban/quicktest v1.14.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/validator/v10 v10.30.1
-	github.com/go-resty/resty/v2 v2.16.5
+	github.com/go-resty/resty/v2 v2.17.2
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/cel-go v0.23.2
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.8
@@ -46,7 +46,7 @@ require (
 	golang.org/x/sync v0.19.0
 	golang.org/x/sys v0.41.0
 	golang.org/x/text v0.34.0
-	golang.org/x/time v0.10.0
+	golang.org/x/time v0.12.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.6.0
