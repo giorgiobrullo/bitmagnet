@@ -55,6 +55,7 @@ type Client interface {
 
 type Params struct {
 	fx.In
+	Config metrics.Config
 	DB     lazy.Lazy[*gorm.DB]
 	Logger *zap.SugaredLogger
 }
@@ -67,6 +68,7 @@ type Result struct {
 
 func New(p Params) Result {
 	c := &client{
+		config: p.Config,
 		db:     p.DB,
 		logger: p.Logger.Named("torrent_snapshots"),
 	}
@@ -92,6 +94,7 @@ func New(p Params) Result {
 }
 
 type client struct {
+	config  metrics.Config
 	db      lazy.Lazy[*gorm.DB]
 	logger  *zap.SugaredLogger
 	stopped chan struct{}
@@ -221,7 +224,6 @@ func (c *client) ContentBreakdown(ctx context.Context) ([]ContentCount, error) {
 const (
 	snapshotInterval = 60 * time.Second
 	cleanupInterval  = time.Hour
-	retentionPeriod  = 7 * 24 * time.Hour
 )
 
 func (c *client) runSnapshotWorker() {
@@ -265,7 +267,7 @@ func (c *client) cleanupOldSnapshots() {
 		return
 	}
 
-	cutoff := time.Now().Add(-retentionPeriod)
+	cutoff := time.Now().Add(-c.config.RetentionPeriod)
 	if err := db.Exec("DELETE FROM torrent_snapshots WHERE recorded_at < ?", cutoff).Error; err != nil {
 		c.logger.Warnw("failed to cleanup old torrent snapshots", "error", err)
 	}

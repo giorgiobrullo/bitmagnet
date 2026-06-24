@@ -48,10 +48,11 @@ type Client interface {
 
 type Params struct {
 	fx.In
-	KTable           ktable.Table                                  `name:"ipv4"`
-	KTable6          ktable.Table                                  `name:"ipv6"`
+	Config           metrics.Config
+	KTable           ktable.Table                                   `name:"ipv4"`
+	KTable6          ktable.Table                                   `name:"ipv6"`
 	LastResponses    *concurrency.AtomicValue[server.LastResponses] `name:"dht_server_last_responses"`
-	DhtCrawlerActive *concurrency.AtomicValue[bool]                `name:"dht_crawler_active"`
+	DhtCrawlerActive *concurrency.AtomicValue[bool]                 `name:"dht_crawler_active"`
 	DB               lazy.Lazy[*gorm.DB]
 	Logger           *zap.SugaredLogger
 }
@@ -64,6 +65,7 @@ type Result struct {
 
 func New(p Params) Result {
 	c := &client{
+		config:           p.Config,
 		kTable:           p.KTable,
 		kTable6:          p.KTable6,
 		lastResponses:    p.LastResponses,
@@ -93,6 +95,7 @@ func New(p Params) Result {
 }
 
 type client struct {
+	config           metrics.Config
 	kTable           ktable.Table
 	kTable6          ktable.Table
 	lastResponses    *concurrency.AtomicValue[server.LastResponses]
@@ -165,7 +168,6 @@ func (c *client) RequestMetrics(ctx context.Context, req MetricsRequest) ([]Snap
 const (
 	snapshotInterval = 30 * time.Second
 	cleanupInterval  = time.Hour
-	retentionPeriod  = 7 * 24 * time.Hour
 )
 
 func (c *client) runSnapshotWorker() {
@@ -208,7 +210,7 @@ func (c *client) cleanupOldSnapshots() {
 		return
 	}
 
-	cutoff := time.Now().Add(-retentionPeriod)
+	cutoff := time.Now().Add(-c.config.RetentionPeriod)
 	if err := db.Exec("DELETE FROM dht_snapshots WHERE recorded_at < ?", cutoff).Error; err != nil {
 		c.logger.Warnw("failed to cleanup old dht snapshots", "error", err)
 	}
