@@ -32,6 +32,8 @@ func (r *requesterLazy) Request(ctx context.Context, path string, queryParams ma
 	return r.requester.Request(ctx, path, queryParams, result)
 }
 
+const breakerCooldown = 5 * time.Minute
+
 func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 	if !config.Enabled {
 		return nil, errors.New("Jikan is disabled")
@@ -54,7 +56,7 @@ func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 	})
 
 	return requesterLogger{
-		requester: requester{resty: c, sem: sem, limiter: limiter},
+		requester: requester{resty: c, sem: sem, limiter: limiter, breaker: newBreaker(breakerCooldown)},
 		logger:    logger,
 	}, nil
 }

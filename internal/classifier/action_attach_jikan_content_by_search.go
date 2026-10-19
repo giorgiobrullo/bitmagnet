@@ -1,7 +1,10 @@
 package classifier
 
 import (
+	"errors"
+
 	"github.com/bitmagnet-io/bitmagnet/internal/classifier/classification"
+	"github.com/bitmagnet-io/bitmagnet/internal/jikan"
 )
 
 const attachJikanContentBySearchName = "attach_jikan_content_by_search"
@@ -34,6 +37,11 @@ func (attachJikanContentBySearchAction) compileAction(ctx compilerContext) (acti
 			}
 
 			result, searchErr := ctx.jikanSearchAnime(cl.BaseTitle.String)
+			if errors.Is(searchErr, jikan.ErrUnavailable) {
+				// Jikan is the last anime fallback; classify without it rather than fail the
+				// whole batch and requeue it while the API is down
+				return cl, classification.ErrUnmatched
+			}
 			if searchErr != nil {
 				ctx.logger.Infow("jikan anime not found",
 					"base_title", cl.BaseTitle.String)
