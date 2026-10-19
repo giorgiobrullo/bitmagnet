@@ -4,6 +4,7 @@ package jikan
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -60,4 +61,31 @@ func TestSearchAnime_TransformerOutput(t *testing.T) {
 	assert.NotEmpty(t, content.ID)
 	assert.NotEmpty(t, content.Title)
 	t.Logf("Content: type=%s source=%s id=%s title=%q year=%d", content.Type, content.Source, content.ID, content.Title, content.ReleaseYear)
+}
+
+func TestSearchAnime_Mal(t *testing.T) {
+	clientID := os.Getenv("JIKAN_MAL_CLIENT_ID")
+	if clientID == "" {
+		t.Skip("JIKAN_MAL_CLIENT_ID not set")
+	}
+
+	r, err := newRequester(Config{
+		Enabled:        true,
+		RateLimit:      time.Second,
+		RateLimitBurst: 1,
+		MalClientID:    clientID,
+	}, zap.NewNop().Sugar())
+	require.NoError(t, err)
+	c := client{requester: r, mal: true}
+
+	resp, err := c.SearchAnime(context.Background(), SearchAnimeRequest{Query: "Death Note", Limit: 5})
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Data)
+
+	anime := resp.Data[0]
+	t.Logf("First result: %s / %s (mal_id=%d, year=%d, type=%s)", anime.TitleEnglish, anime.Title, anime.MalID, anime.Year, anime.Type)
+	assert.Equal(t, 1535, anime.MalID)
+	assert.Equal(t, 2006, anime.Year)
+	assert.Equal(t, "TV", anime.Type)
+	assert.NotEmpty(t, anime.Images.JPG.LargeImageURL)
 }

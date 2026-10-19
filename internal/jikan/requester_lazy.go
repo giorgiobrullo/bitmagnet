@@ -42,14 +42,22 @@ func newRequester(config Config, logger *zap.SugaredLogger) (Requester, error) {
 	limiter := rate.NewLimiter(rate.Every(config.RateLimit), config.RateLimitBurst)
 	sem := semaphore.NewWeighted(1)
 
+	baseURL := config.BaseURL
+	if config.MalClientID != "" {
+		baseURL = malBaseURL
+	}
+
 	c := resty.New().
-		SetBaseURL(config.BaseURL).
+		SetBaseURL(baseURL).
 		SetRetryCount(2).
 		SetRetryWaitTime(2 * time.Second).
 		SetRetryMaxWaitTime(10 * time.Second).
 		SetTimeout(15 * time.Second).
 		EnableTrace().
 		SetHeader("User-Agent", "bitmagnet/1.0 (https://github.com/bitmagnet-io/bitmagnet)")
+	if config.MalClientID != "" {
+		c.SetHeader("X-MAL-CLIENT-ID", config.MalClientID)
+	}
 
 	c.AddRetryCondition(func(r *resty.Response, err error) bool {
 		return r != nil && (r.StatusCode() == 429 || r.StatusCode() == 503)

@@ -21,6 +21,7 @@ func New(p Params) Result {
 	return Result{
 		Client: lazy.New(func() (Client, error) {
 			return client{
+				mal: p.Config.MalClientID != "",
 				requester: &requesterLazy{
 					config: p.Config,
 					logger: p.Logger,
