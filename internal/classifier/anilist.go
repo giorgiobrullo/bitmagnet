@@ -19,7 +19,7 @@ func (c executionContext) anilistSearchAnime(title string, contentType model.Con
 		return model.Content{}, classification.ErrUnmatched
 	}
 
-	bestMatch, ok := levenshteinFindBestMatch[anilist.MediaResult](
+	bestMatch, ok := levenshteinFindCloseMatch[anilist.MediaResult](
 		title,
 		results,
 		func(item anilist.MediaResult) []string {

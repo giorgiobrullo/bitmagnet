@@ -19,7 +19,7 @@ func (c executionContext) jikanSearchAnime(title string) (model.Content, error) 
 		return model.Content{}, classification.ErrUnmatched
 	}
 
-	bestMatch, ok := levenshteinFindBestMatch[jikan.AnimeResult](
+	bestMatch, ok := levenshteinFindCloseMatch[jikan.AnimeResult](
 		title,
 		resp.Data,
 		func(item jikan.AnimeResult) []string {

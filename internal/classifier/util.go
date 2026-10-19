@@ -15,6 +15,25 @@ func levenshteinFindBestMatch[T any](target string, items []T, getCandidates fun
 		threshold = scaled
 	}
 
+	return levenshteinFindBestMatchWithin(target, items, getCandidates, threshold)
+}
+
+// levenshteinFindCloseMatch allows one edit per four characters of the target instead of a
+// flat five. The anime fallbacks only see titles TMDB couldn't match, much of it not anime at
+// all, and their fuzzy search always returns something: with five edits a short title like
+// "EPL" matched "Replay".
+func levenshteinFindCloseMatch[T any](target string, items []T, getCandidates func(T) []string) (t T, ok bool) {
+	threshold := len(levenshteinNormalizeString(target)) / 4
+
+	return levenshteinFindBestMatchWithin(target, items, getCandidates, threshold)
+}
+
+func levenshteinFindBestMatchWithin[T any](
+	target string,
+	items []T,
+	getCandidates func(T) []string,
+	threshold int,
+) (t T, ok bool) {
 	minDistance := threshold + 1
 	bestMatch := -1
 
