@@ -3,6 +3,7 @@ package torrentmetrics
 import (
 	"context"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bitmagnet-io/bitmagnet/internal/lazy"
@@ -98,6 +99,12 @@ type client struct {
 	db      lazy.Lazy[*gorm.DB]
 	logger  *zap.SugaredLogger
 	stopped chan struct{}
+
+	// The breakdown counts every classified torrent; an open dashboard asks for it on
+	// each refresh, so keep one result for a while.
+	breakdownMu sync.Mutex
+	breakdown   []ContentCount
+	breakdownAt time.Time
 }
 
 func (c *client) Request(ctx context.Context, req Request) ([]Bucket, error) {
@@ -204,6 +211,13 @@ func (c *client) RequestLibraryMetrics(ctx context.Context, req LibraryMetricsRe
 }
 
 func (c *client) ContentBreakdown(ctx context.Context) ([]ContentCount, error) {
+	c.breakdownMu.Lock()
+	defer c.breakdownMu.Unlock()
+
+	if c.breakdown != nil && time.Since(c.breakdownAt) < breakdownCacheTTL {
+		return c.breakdown, nil
+	}
+
 	db, err := c.db.Get()
 	if err != nil {
 		return nil, err
@@ -218,12 +232,18 @@ func (c *client) ContentBreakdown(ctx context.Context) ([]ContentCount, error) {
 		return nil, err
 	}
 
+	c.breakdown = result
+	c.breakdownAt = time.Now()
+
 	return result, nil
 }
 
+// Each snapshot scans the whole torrents table, which on a large library takes long
+// enough to hold up searches, so take one every few minutes rather than every minute.
 const (
-	snapshotInterval = 60 * time.Second
-	cleanupInterval  = time.Hour
+	snapshotInterval  = 5 * time.Minute
+	breakdownCacheTTL = 5 * time.Minute
+	cleanupInterval   = time.Hour
 )
 
 func (c *client) runSnapshotWorker() {
